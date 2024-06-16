@@ -37,30 +37,40 @@ async function main() {
         deployer.chain.nativeCurrency.symbol
       );
 
-      console.log("\nDeploying Ballot contract");
-      const hash = await deployer.deployContract({
-        abi: abiBallot,
-        bytecode: bytecodeBallot as `0x${string}`,
-        args: [proposals.map((prop) => toHex(prop, { size: 32 }))],
+      console.log("\nDeploying Token contract");
+      let hash = await deployer.deployContract({
+        abi: abiToken,
+        bytecode: bytecodeToken as `0x${string}`,
+        args: [],
       });
       console.log("Transaction hash:", hash);
       console.log("Waiting for confirmations...");
-      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      let receipt = await publicClient.waitForTransactionReceipt({ hash });
+      const tokenAddress = receipt.contractAddress;
+      console.log("Token contract deployed to:", tokenAddress);     
+      
+      if(!tokenAddress) throw new Error("Contract address not found");
+
+      // TODO: mint tokens before deploying the ballot
+
+      const lastBlockNumber = await publicClient.getBlockNumber();
+      const targetBlockNumber = lastBlockNumber - 100n;
+      console.log("\nDeploying Ballot contract");
+      hash = await deployer.deployContract({
+        abi: abiBallot,
+        bytecode: bytecodeBallot as `0x${string}`,
+        args: [
+          tokenAddress,
+          proposals.map((prop) => toHex(prop, { size: 32 })),
+          targetBlockNumber
+        ],
+      });
+      console.log("Transaction hash:", hash);
+      console.log("Waiting for confirmations...");
+      receipt = await publicClient.waitForTransactionReceipt({ hash });
       console.log("Ballot contract deployed to:", receipt.contractAddress);     
       
       if(!receipt.contractAddress) throw new Error("Contract address not found");
-      
-      console.log("Proposals: ");
-      for (let index = 0; index < proposals.length; index++) {
-        const proposal = (await publicClient.readContract({
-          address: receipt.contractAddress,
-          abi: abiBallot,
-          functionName: "proposals",
-          args: [BigInt(index)],
-        })) as any[];
-        const name = hexToString(proposal[0], { size: 32 });
-        console.log({ index, name, proposal });
-      }
 }
 
 main().catch((error) => {
