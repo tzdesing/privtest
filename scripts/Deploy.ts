@@ -77,7 +77,7 @@ async function main() {
     await publicClient.waitForTransactionReceipt({ hash });
 
     const lastBlockNumber = await publicClient.getBlockNumber();
-    const targetBlockNumber = lastBlockNumber;
+    
     console.log("\nDeploying Ballot contract");
     hash = await deployer.deployContract({
         abi: abiBallot,
@@ -85,8 +85,9 @@ async function main() {
         args: [
             proposals.map((prop) => toHex(prop, { size: 32 })),
             tokenAddress,
-            targetBlockNumber
+            lastBlockNumber
         ],
+        
     });
     console.log("Transaction hash:", hash);
     console.log("Waiting for confirmations...");

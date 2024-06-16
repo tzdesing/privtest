@@ -1,6 +1,6 @@
 import { createPublicClient, http, hexToString } from "viem";
 import { sepolia } from "viem/chains";
-import { abi } from "../artifacts/contracts/Ballot.sol/Ballot.json";
+import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
 import * as dotenv from "dotenv";
 
 
