@@ -27,7 +27,7 @@ Deploying the Ballot contract:
 npx ts-node --files ./scripts/DeployWithViem.ts "proposal1" "proposal2" "proposal3" "proposalN"
 ```
 
-Voting for proposal `0` where `0` is the proposal number of the proposal you want to vote:
+Voting for proposal `0` where `0` is the proposal number of the proposal you want to vote, using `amount` tokens to vote:
 ```bash
 npx ts-node --files ./scripts/CastVote.ts "CONTRACT_ADDRESS" 0 amount
 ```
