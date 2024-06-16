@@ -24,7 +24,7 @@ The scripts are supposed to be run with `npx ts-node`.
 
 Deploying the Ballot contract:
 ```bash
-npx ts-node --files ./scripts/DeployWithViem.ts "proposal1" "proposal2" "proposal3" "proposalN"
+npx ts-node --files ./scripts/Deploy.ts "proposal1" "proposal2" "proposal3" "proposalN"
 ```
 
 Voting for proposal `0` where `0` is the proposal number of the proposal you want to vote, using `amount` tokens to vote:
