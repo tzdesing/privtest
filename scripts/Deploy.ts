@@ -77,7 +77,7 @@ async function main() {
     await publicClient.waitForTransactionReceipt({ hash });
 
     const lastBlockNumber = await publicClient.getBlockNumber();
-    const targetBlockNumber = lastBlockNumber - 100n;
+    const targetBlockNumber = lastBlockNumber;
     console.log("\nDeploying Ballot contract");
     hash = await deployer.deployContract({
         abi: abiBallot,
