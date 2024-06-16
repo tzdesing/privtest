@@ -1,7 +1,8 @@
 import { createPublicClient, http, createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi, bytecode } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
+import { abi as abiBallot, bytecode as bytecodeBallot } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
+import { abi as abiToken, bytecode as bytecodeToken } from "../artifacts/contracts/MyToken.sol/MyToken.json";
 import * as dotenv from "dotenv";
 
 
@@ -11,7 +12,7 @@ const chairPersonPrivateKey = process.env.PRIVATE_KEY || "";
 
 async function main() {
     const parameters = process.argv.slice(2);
-    if (!parameters || parameters.length < 2)
+    if (!parameters || parameters.length < 3)
         throw new Error("Parameters not provided");
     const contractAddress = parameters[0] as `0x${string}`;
     if (!contractAddress) throw new Error("Contract address not provided");
@@ -23,6 +24,8 @@ async function main() {
     if (!/^0x[a-fA-F0-9]{40}$/.test(delegateToAddress))
         throw new Error("Invalid delegate address");
 
+    const amount = parseInt(parameters[2]);
+
     const account = privateKeyToAccount(`0x${chairPersonPrivateKey}`);
     const delegatorClient = createWalletClient({
         account,
@@ -33,11 +36,33 @@ async function main() {
     const publicClient = createPublicClient({
         chain: sepolia,
         transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
-        });
+    });
 
-    const hash = await delegatorClient.writeContract({
+    const tokenAddress = (await publicClient.readContract({
         address: contractAddress,
-        abi,
+        abi: abiBallot,
+        functionName: "tokenContract",
+        args: [],
+    })) as `0x${string}`;
+
+    
+    console.log("Transfering tokens")
+    let hash = await delegatorClient.writeContract({
+        address: tokenAddress,
+        abi: abiToken,
+        functionName: "transfer",
+        args: [delegateToAddress, amount],
+    });
+
+    console.log("Transaction hash:", hash);
+    console.log("Waiting for confirmation...");
+    await publicClient.waitForTransactionReceipt({ hash });
+    console.log("Transaction finished");
+
+    console.log("Delegating voting power")
+    hash = await delegatorClient.writeContract({
+        address: tokenAddress,
+        abi: abiToken,
         functionName: "delegate",
         args: [delegateToAddress],
     });
