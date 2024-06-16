@@ -11,14 +11,24 @@ const deployerPrivateKey = process.env.PRIVATE_KEY || "";
 
 async function main() {
     const parameters = process.argv.slice(2);
-    if (!parameters || parameters.length < 2)
+
+    if (!parameters || parameters.length < 3)
         throw new Error("Parameters not provided");
+
     const contractAddress = parameters[0] as `0x${string}`;
+
     if (!contractAddress) throw new Error("Contract address not provided");
+
     if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress))
         throw new Error("Invalid contract address");
+
     const proposalIndex = parameters[1];
+    
     if (isNaN(Number(proposalIndex))) throw new Error("Invalid proposal index");
+
+    const amount = parameters[2];
+
+    if (isNaN(Number(amount))) throw new Error("Invalid amount");
 
 
     const account = privateKeyToAccount(`0x${deployerPrivateKey}`);
@@ -44,12 +54,11 @@ async function main() {
     const name = hexToString(proposal[0], { size: 32 });
     console.log("Voting to proposal", name);
 
-
     const hash = await voter.writeContract({
         address: contractAddress,
         abi,
         functionName: "vote",
-        args: [BigInt(proposalIndex)],
+        args: [BigInt(proposalIndex), BigInt(amount)],
     });
     console.log("Transaction hash:", hash);
     console.log("Waiting for confirmations...");
