@@ -1,15 +1,16 @@
 import { createPublicClient, http, createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
+import { abi } from "../artifacts/contracts/MyToken.sol/MyToken.json";
 import * as dotenv from "dotenv";
 
 
 dotenv.config();
 const providerApiKey = process.env.ALCHEMY_API_KEY || "";
-const chairPersonPrivateKey = process.env.PRIVATE_KEY || "";
+const senderPrivateKey = process.env.PRIVATE_KEY || "";
 
 async function main() {
+    // receiving args
     const parameters = process.argv.slice(2);
     if (!parameters || parameters.length < 2)
         throw new Error("Parameters not provided");
@@ -17,16 +18,17 @@ async function main() {
     if (!contractAddress) throw new Error("Contract address not provided");
     if (!/^0x[a-fA-F0-9]{40}$/.test(contractAddress))
         throw new Error("Invalid contract address");
+    
+    const receiverAddress = parameters[1];
+    if (!receiverAddress) throw new Error("Receiver address not provided");
+    if (!/^0x[a-fA-F0-9]{40}$/.test(receiverAddress))
+        throw new Error("Invalid receiver address");
 
-    const voterAddress = parameters[1];
+const amount = parameters[2];
+    if (!amount) throw new Error("Amount not provided");
 
-    if (!voterAddress) throw new Error("Voter address not provided");
-
-    if (!/^0x[a-fA-F0-9]{40}$/.test(voterAddress))
-        throw new Error("Invalid voter address");
-
-    const account = privateKeyToAccount(`0x${chairPersonPrivateKey}`);
-    const delegatorClient = createWalletClient({
+    const account = privateKeyToAccount(`0x${senderPrivateKey}`);
+    const senderClient = createWalletClient({
         account,
         chain: sepolia,
         transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
@@ -35,13 +37,14 @@ async function main() {
     const publicClient = createPublicClient({
         chain: sepolia,
         transport: http(`https://eth-sepolia.g.alchemy.com/v2/${providerApiKey}`),
-        });
+    });
+      console.log(`\n Transfering ${amount} tokens to ${receiverAddress}`);
 
-    const hash = await delegatorClient.writeContract({
+    const hash = await senderClient.writeContract({
         address: contractAddress,
         abi,
-        functionName: "giveRightToVote",
-        args: [voterAddress],
+        functionName: "transfer",
+        args: [receiverAddress, amount],
     });
 
     console.log("Transaction hash:", hash);
