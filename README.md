@@ -45,12 +45,12 @@ npx ts-node --files ./scripts/DelegateVote.ts "CONTRACT_ADDRESS" "DEGELATE_ADDRE
 
 Querying the vote power :
 ```bash
-npx ts-node --files ./scripts/getWinnerProposal.ts "CONTRACT_ADDRESS" "VOTER_ADDRESS"
+npx ts-node --files ./scripts/GetVotingPower.ts "CONTRACT_ADDRESS" "VOTER_ADDRESS"
 ```
 
 Querying the winner proposal:
 ```bash
-npx ts-node --files ./scripts/getWinnerProposal.ts "CONTRACT_ADDRESS"
+npx ts-node --files ./scripts/GetWinnerProposal.ts "CONTRACT_ADDRESS"
 ```
 
 ## Contributors
