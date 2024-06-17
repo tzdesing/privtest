@@ -1,6 +1,6 @@
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
-import { abi } from "../artifacts/contracts/MyToken.sol/MyToken.json";
+import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
 import * as dotenv from "dotenv";
 
 
@@ -30,7 +30,7 @@ async function main() {
     const voteCount = (await publicClient.readContract({
         address: contractAddress,
         abi,
-        functionName: "getVotes",
+        functionName: "getVotePower",
         args: [voterAddress],
       })) as `0x${string}`;    
 

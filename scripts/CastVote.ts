@@ -1,4 +1,4 @@
-import { createPublicClient, http, createWalletClient, formatEther, toHex, hexToString } from "viem";
+import { createPublicClient, http, createWalletClient, hexToString } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
 import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
