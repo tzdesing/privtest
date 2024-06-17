@@ -1,8 +1,8 @@
 import { createPublicClient, http, createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { sepolia } from "viem/chains";
-import { abi as abiBallot, bytecode as bytecodeBallot } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
-import { abi as abiToken, bytecode as bytecodeToken } from "../artifacts/contracts/MyToken.sol/MyToken.json";
+import { abi as abiBallot } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
+import { abi as abiToken } from "../artifacts/contracts/MyToken.sol/MyToken.json";
 import * as dotenv from "dotenv";
 
 
