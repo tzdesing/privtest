@@ -1,7 +1,7 @@
 {
-  "name": "encode-club-solidity-bootcamp-week2",
+  "name": "harpo",
   "version": "1.0.0",
-  "description": "Week 2 assignment from Encode Club Solidity Bootcamp",
+  "description": "ZK UTXO privacy implementation",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,6 +15,9 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "@zk-kit/poseidon-cipher": "^0.3.1",
+    "@zk-kit/baby-jubjub": "^1.0.1",
+    "poseidon-lite": "0.2.1"
   }
 }
