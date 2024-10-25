@@ -1,11 +1,44 @@
 import { viem } from "hardhat";
 
 import { parseEther, formatEther } from "viem";
+import { ethers } from "ethers";
+import {
+  genKeypair,
+  formatPrivKeyForBabyJub
+} from "maci-crypto";
+import { poseidonEncrypt, poseidonDecrypt, poseidonDecryptWithoutCheck } from "@zk-kit/poseidon-cipher"
+import { BabyJub,buildBabyjub, Eddsa, buildPoseidon } from "circomlibjs";
+//import { Scalar } from "@toruslabs/ffjavascript";
+
 
 const MINT_VALUE = 1000n;
 
 async function main() {
-  const publicClient = await viem.getPublicClient();
+  const ff = require('ffjavascript')
+  const { privKey, pubKey } = genKeypair();
+  const formattedPrivateKey = formatPrivKeyForBabyJub(privKey);
+
+  console.log(`Private Key ${privKey}\n`);
+  console.log(`Public Key ${pubKey}\n`);
+  console.log(`Formatted Private Key ${formattedPrivateKey}\n`);
+
+  const babyJub = await buildBabyjub();
+
+  
+
+  //const privateKey = BigInt(privKey.toString());//ff.Scalar.random();  // Chave privada do receptor
+  //console.log(`Private Key 2 ${privateKey}\n`);
+  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, BigInt(privKey.toString()));  // Chave pública correspondente
+  console.log(`Public Key 2 ${publicKey}\n`);
+
+  const message = ff.Scalar.fromString("12345"); // Mensagem a ser criptografada
+  const encrypted = encryptMessage(publicKey, message);
+  console.log("Encrypted:", encrypted);
+
+  //const decryptedMessage = decryptMessage(privateKey, encrypted);
+  //console.log("Decrypted Message:", decryptedMessage.toString());
+
+  /*const publicClient = await viem.getPublicClient();
   const [deployer, acc1, acc2] = await viem.getWalletClients();
   const contract = await viem.deployContract("MyToken");
   console.log(`Token contract deployed at ${contract.address}\n`);
@@ -73,10 +106,47 @@ async function main() {
         acc1.account.address
       } had ${pastVotes.toString()} units of voting power at block ${index}\n`
     );
-  }
+  }*/
 }
 
 main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+
+async function encryptMessage(publicKey: any, message: bigint): Promise<any> {
+  const ff = require('ffjavascript')
+  const poseidon = await buildPoseidon();
+  const babyJub = await buildBabyjub();
+  // Gera um nonce aleatório
+  const r = BigInt(genKeypair().privKey.toString());
+  
+  // c1 = r * G, onde G é o gerador da BabyJubJub
+  const c1 = babyJub.mulPointEscalar(babyJub.Base8, r);
+
+  // P = r * PublicKey
+  const sharedPoint = babyJub.mulPointEscalar(publicKey, r);
+
+  // Usa a coordenada x do ponto compartilhado como uma "chave" e a mistura com a mensagem
+  const sharedKey = poseidon([sharedPoint[0]]);
+  const c2 = ff.Scalar.add(message, sharedKey);
+
+  return { c1, c2 };
+}
+
+// Função de decriptação
+async function decryptMessage(privateKey: bigint, ciphertext: any): Promise<bigint> {
+  const ff = require('ffjavascript')
+  const poseidon = await buildPoseidon();
+  const babyJub = await buildBabyjub();
+  // P = privateKey * c1
+  const sharedPoint = babyJub.mulPointEscalar(ciphertext.c1, privateKey);
+
+  // Usa a coordenada x do ponto compartilhado como a "chave"
+  const sharedKey = poseidon([sharedPoint[0]]);
+
+  // Recupera a mensagem original
+  const message = ff.Scalar.sub(ciphertext.c2, sharedKey);
+
+  return message;
+}

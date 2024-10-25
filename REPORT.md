@@ -182,3 +182,13 @@ Winner proposal index:  0n
 Winner Proposal Name:  proposal1
 Winner Proposal Vote Count:  1000000n
 ```
+Após analisar Verkle tree e Merkle tree
+
+Concluo que a verkle tree seria a estrutura ideal de dados para acomodar os commitments a longo prazo
+no entanto é uma tecnologia recente , com pouquissimo material disponivel e pouco uso em produção.
+Por isso sugiro seguir com Merkle tree por enquanto, visto que existe amplo material está em produção no ethereum e bitcoin e deverá atender a rede por um bom tempo.
+
+Analisar Sparse Merkle Tree
+...
+
+
