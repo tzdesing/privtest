@@ -19,6 +19,7 @@
     "ts-node": "^10.9.2"
   },
   "dependencies": {
+    "@vekexasia/bigint-uint8array": "^1.1.1",
     "@zk-kit/baby-jubjub": "^1.0.1",
     "@zk-kit/poseidon-cipher": "^0.3.2",
     "circomlibjs": "^0.1.7",

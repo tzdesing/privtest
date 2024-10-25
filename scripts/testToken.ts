@@ -2,6 +2,7 @@ import { viem } from "hardhat";
 
 import { parseEther, formatEther } from "viem";
 import { ethers } from "ethers";
+
 import {
   genKeypair,
   formatPrivKeyForBabyJub
@@ -31,12 +32,12 @@ async function main() {
   const publicKey = babyJub.mulPointEscalar(babyJub.Base8, BigInt(privKey.toString()));  // Chave pública correspondente
   console.log(`Public Key 2 ${publicKey}\n`);
 
-  const message = ff.Scalar.fromString("12345"); // Mensagem a ser criptografada
-  const encrypted = encryptMessage(publicKey, message);
+  const message = BigInt("11943763924"); // Mensagem a ser criptografada
+  const encrypted = await encryptMessage(publicKey, message);
   console.log("Encrypted:", encrypted);
 
-  //const decryptedMessage = decryptMessage(privateKey, encrypted);
-  //console.log("Decrypted Message:", decryptedMessage.toString());
+  const decryptedMessage = await decryptMessage(BigInt(privKey.toString()), encrypted);
+  console.log("Decrypted Message:", decryptedMessage.toString());
 
   /*const publicClient = await viem.getPublicClient();
   const [deployer, acc1, acc2] = await viem.getWalletClients();
@@ -115,21 +116,27 @@ main().catch((err) => {
 });
 
 async function encryptMessage(publicKey: any, message: bigint): Promise<any> {
+  console.log(`message -> ${message}\n`);
   const ff = require('ffjavascript')
+ 
   const poseidon = await buildPoseidon();
   const babyJub = await buildBabyjub();
   // Gera um nonce aleatório
   const r = BigInt(genKeypair().privKey.toString());
-  
+  console.log(`R -> ${r}\n`);
   // c1 = r * G, onde G é o gerador da BabyJubJub
   const c1 = babyJub.mulPointEscalar(babyJub.Base8, r);
-
+  console.log(`C1 -> ${c1}\n`);
   // P = r * PublicKey
   const sharedPoint = babyJub.mulPointEscalar(publicKey, r);
-
+  console.log(`sharedPoint -> ${sharedPoint}\n`);
   // Usa a coordenada x do ponto compartilhado como uma "chave" e a mistura com a mensagem
   const sharedKey = poseidon([sharedPoint[0]]);
-  const c2 = ff.Scalar.add(message, sharedKey);
+  console.log(`sharedKey -> ${sharedKey}\n`);
+
+  let bigint = method1(sharedKey); // 42n
+
+  const c2 = ff.Scalar.add(message, bigint);
 
   return { c1, c2 };
 }
@@ -144,9 +151,30 @@ async function decryptMessage(privateKey: bigint, ciphertext: any): Promise<bigi
 
   // Usa a coordenada x do ponto compartilhado como a "chave"
   const sharedKey = poseidon([sharedPoint[0]]);
+  console.log(`sharedKey -> ${sharedKey}\n`);
 
+  let bigint = method1(sharedKey);
   // Recupera a mensagem original
-  const message = ff.Scalar.sub(ciphertext.c2, sharedKey);
+  const message = ff.Scalar.sub(ciphertext.c2, bigint);
 
   return message;
+}
+
+
+
+function method1(arr: any) {
+  let buf = arr.buffer
+  let bits = 8n
+  if (ArrayBuffer.isView(buf)) {
+    bits = BigInt(64)
+  } else {
+    buf = new Uint8Array(buf)
+  }
+
+  let ret = 0n
+  for (const i of buf.values()) {
+    const bi = BigInt(i)
+    ret = (ret << bits) + bi
+  }
+  return ret
 }
