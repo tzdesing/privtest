@@ -9,6 +9,7 @@ import {
 } from "maci-crypto";
 import { poseidonEncrypt, poseidonDecrypt, poseidonDecryptWithoutCheck } from "@zk-kit/poseidon-cipher"
 import { BabyJub,buildBabyjub, Eddsa, buildPoseidon } from "circomlibjs";
+import { Input, Output, Proof, Transfer } from "../model/interfaces";
 //import { Scalar } from "@toruslabs/ffjavascript";
 
 
@@ -32,12 +33,72 @@ async function main() {
   const publicKey = babyJub.mulPointEscalar(babyJub.Base8, BigInt(privKey.toString()));  // Chave pública correspondente
   console.log(`Public Key 2 ${publicKey}\n`);
 
-  const message = BigInt("11943763924"); // Mensagem a ser criptografada
-  const encrypted = await encryptMessage(publicKey, message);
+  const proofE1: Proof = {
+    proofType: "ownership",
+    proofValue: "proofOwnershipE1",
+  };
+
+  const inputE1: Input = {
+    secret: "secretE1",
+    proof: proofE1,
+  };
+
+  const proofE2: Proof = {
+    proofType: "ownership",
+    proofValue: "proofOwnershipE2",
+  };
+
+  const inputE2: Input = {
+    secret: "secretE2",
+    proof: proofE2,
+  };
+
+  let transfer: Partial<Transfer> = {};
+  transfer.inputs = [];
+  transfer.outputs = [];
+
+  transfer.inputs?.push(inputE1);
+  transfer.inputs?.push(inputE2);
+
+  const outputE7: Output = {
+    secret: "secretE7",
+    rangeOrigin: "rangeOrigin",
+    rangeDestiny: "rangeDestiny",
+  };
+
+  const outputE8: Output = {
+    secret: "secretE8",
+    rangeOrigin: "rangeOrigin",
+    rangeDestiny: "rangeOrigin",
+  };
+
+  transfer.outputs?.push(outputE7);
+  transfer.outputs?.push(outputE8);
+
+  transfer.secretAudit = "teste";
+  transfer.massConservationProof = proofE2;
+  transfer.nonRepudiationProof = proofE2;
+
+  //const jsonString = JSON.stringify(transfer);
+  //console.log("Transfer JSON:", jsonString);
+
+  const transferHex = objectToHex(transfer);
+  console.log("Transfer em Hexadecimal:", transferHex);
+
+  const transferBigInt = hexToBigInt(transferHex);
+  console.log("Transfer em BigInt:", transferBigInt);
+  
+
+  const encrypted = await encryptMessage(publicKey, transferBigInt);
   console.log("Encrypted:", encrypted);
 
   const decryptedMessage = await decryptMessage(BigInt(privKey.toString()), encrypted);
   console.log("Decrypted Message:", decryptedMessage.toString());
+
+  const hexFromBigInt = bigIntToHex(decryptedMessage);
+  const originalTransfer = hexToObject<Transfer>(hexFromBigInt);
+
+  console.log("Objeto original:", originalTransfer);
 
   /*const publicClient = await viem.getPublicClient();
   const [deployer, acc1, acc2] = await viem.getWalletClients();
@@ -114,6 +175,41 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+
+function objectToHex(obj: object): string {
+  // Converte o objeto para JSON, depois para um array de bytes e então para hexadecimal
+  const jsonString = JSON.stringify(obj);
+  const hexString = Array.from(jsonString)
+      .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
+      .join('');
+  return `0x${hexString}`;
+}
+
+function hexToBigInt(hexString: string): bigint {
+  return BigInt(hexString);
+}
+
+function bigIntToHex(bigInt: bigint): string {
+  let hexString = bigInt.toString(16);
+  // Ajusta para número par de dígitos, se necessário
+  if (hexString.length % 2 !== 0) {
+      hexString = '0' + hexString;
+  }
+  return `0x${hexString}`;
+}
+
+function hexToObject<T>(hexString: string): T {
+  // Remove "0x" do início, se presente
+  const strippedHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
+
+  // Converte o hexadecimal de volta para uma string JSON
+  const jsonString = Array.from({ length: strippedHex.length / 2 }, (_, i) =>
+      String.fromCharCode(parseInt(strippedHex.slice(i * 2, i * 2 + 2), 16))
+  ).join('');
+
+  // Faz o parse da string JSON para o objeto original
+  return JSON.parse(jsonString);
+}
 
 async function encryptMessage(publicKey: any, message: bigint): Promise<any> {
   console.log(`message -> ${message}\n`);
