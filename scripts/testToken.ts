@@ -12,7 +12,6 @@ import { BabyJub,buildBabyjub, Eddsa, buildPoseidon } from "circomlibjs";
 import { Input, Output, Proof, Transfer } from "../model/interfaces";
 //import { Scalar } from "@toruslabs/ffjavascript";
 
-
 const MINT_VALUE = 1000n;
 
 async function main() {
@@ -25,8 +24,6 @@ async function main() {
   console.log(`Formatted Private Key ${formattedPrivateKey}\n`);
 
   const babyJub = await buildBabyjub();
-
-  
 
   //const privateKey = BigInt(privKey.toString());//ff.Scalar.random();  // Chave privada do receptor
   //console.log(`Private Key 2 ${privateKey}\n`);
@@ -79,15 +76,11 @@ async function main() {
   transfer.massConservationProof = proofE2;
   transfer.nonRepudiationProof = proofE2;
 
-  //const jsonString = JSON.stringify(transfer);
-  //console.log("Transfer JSON:", jsonString);
-
   const transferHex = objectToHex(transfer);
   console.log("Transfer em Hexadecimal:", transferHex);
 
   const transferBigInt = hexToBigInt(transferHex);
-  console.log("Transfer em BigInt:", transferBigInt);
-  
+  console.log("Transfer em BigInt:", transferBigInt);  
 
   const encrypted = await encryptMessage(publicKey, transferBigInt);
   console.log("Encrypted:", encrypted);
@@ -100,75 +93,6 @@ async function main() {
 
   console.log("Objeto original:", originalTransfer);
 
-  /*const publicClient = await viem.getPublicClient();
-  const [deployer, acc1, acc2] = await viem.getWalletClients();
-  const contract = await viem.deployContract("MyToken");
-  console.log(`Token contract deployed at ${contract.address}\n`);
-
-  const mintTx = await contract.write.mint([acc1.account.address, MINT_VALUE]);
-  await publicClient.waitForTransactionReceipt({ hash: mintTx });
-  console.log(
-    `Minted ${MINT_VALUE.toString()} decimal units to account ${acc1.account.address
-    }\n`
-  );
-  const balanceBN = await contract.read.balanceOf([acc1.account.address]);
-  console.log(
-    `Account ${acc1.account.address
-    } has ${balanceBN.toString()} decimal units of MyToken\n`
-  );
-
-  const votes = await contract.read.getVotes([acc1.account.address]);
-  console.log(
-    `Account ${acc1.account.address
-    } has ${votes.toString()} units of voting power before self delegating\n`
-  );
-
-  const delegateTx = await contract.write.delegate([acc1.account.address], {
-    account: acc1.account,
-  });
-  await publicClient.waitForTransactionReceipt({ hash: delegateTx });
-  const votesAfter = await contract.read.getVotes([acc1.account.address]);
-  console.log(
-    `Account ${acc1.account.address
-    } has ${votesAfter.toString()} units of voting power after self delegating\n`
-  );
-
-  const transferTx = await contract.write.transfer(
-    [acc2.account.address, MINT_VALUE / 2n],
-    {
-      account: acc1.account,
-    }
-  );
-  await publicClient.waitForTransactionReceipt({ hash: transferTx });
-  const votes1AfterTransfer = await contract.read.getVotes([
-    acc1.account.address,
-  ]);
-  console.log(
-    `Account ${
-      acc1.account.address
-    } has ${votes1AfterTransfer.toString()} units of voting power after transferring\n`
-  );
-  const votes2AfterTransfer = await contract.read.getVotes([
-    acc2.account.address,
-  ]);
-  console.log(
-    `Account ${
-      acc2.account.address
-    } has ${votes2AfterTransfer.toString()} units of voting power after receiving a transfer\n`
-  );
-
-  const lastBlockNumber = await publicClient.getBlockNumber();
-  for (let index = lastBlockNumber - 1n; index > 0n; index--) {
-    const pastVotes = await contract.read.getPastVotes([
-      acc1.account.address,
-      index,
-    ]);
-    console.log(
-      `Account ${
-        acc1.account.address
-      } had ${pastVotes.toString()} units of voting power at block ${index}\n`
-    );
-  }*/
 }
 
 main().catch((err) => {
@@ -177,7 +101,6 @@ main().catch((err) => {
 });
 
 function objectToHex(obj: object): string {
-  // Converte o objeto para JSON, depois para um array de bytes e então para hexadecimal
   const jsonString = JSON.stringify(obj);
   const hexString = Array.from(jsonString)
       .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
@@ -191,7 +114,6 @@ function hexToBigInt(hexString: string): bigint {
 
 function bigIntToHex(bigInt: bigint): string {
   let hexString = bigInt.toString(16);
-  // Ajusta para número par de dígitos, se necessário
   if (hexString.length % 2 !== 0) {
       hexString = '0' + hexString;
   }
@@ -199,15 +121,11 @@ function bigIntToHex(bigInt: bigint): string {
 }
 
 function hexToObject<T>(hexString: string): T {
-  // Remove "0x" do início, se presente
   const strippedHex = hexString.startsWith("0x") ? hexString.slice(2) : hexString;
 
-  // Converte o hexadecimal de volta para uma string JSON
   const jsonString = Array.from({ length: strippedHex.length / 2 }, (_, i) =>
       String.fromCharCode(parseInt(strippedHex.slice(i * 2, i * 2 + 2), 16))
   ).join('');
-
-  // Faz o parse da string JSON para o objeto original
   return JSON.parse(jsonString);
 }
 
@@ -255,8 +173,6 @@ async function decryptMessage(privateKey: bigint, ciphertext: any): Promise<bigi
 
   return message;
 }
-
-
 
 function method1(arr: any) {
   let buf = arr.buffer
