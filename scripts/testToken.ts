@@ -5,11 +5,12 @@ import { ethers } from "ethers";
 
 import {
   genKeypair,
-  formatPrivKeyForBabyJub
+  formatPrivKeyForBabyJub,
+  genRandomSalt
 } from "maci-crypto";
 import { poseidonEncrypt, poseidonDecrypt, poseidonDecryptWithoutCheck } from "@zk-kit/poseidon-cipher"
-import { BabyJub,buildBabyjub, Eddsa, buildPoseidon } from "circomlibjs";
-import { Input, Output, Proof, Transfer } from "../model/interfaces";
+import { BabyJub,buildBabyjub, Eddsa, buildPoseidon, Point } from "circomlibjs";
+import { Input, Output, Proof, Transfer, UTXO } from "../model/interfaces";
 //import { Scalar } from "@toruslabs/ffjavascript";
 
 const MINT_VALUE = 1000n;
@@ -27,7 +28,7 @@ async function main() {
 
   //const privateKey = BigInt(privKey.toString());//ff.Scalar.random();  // Chave privada do receptor
   //console.log(`Private Key 2 ${privateKey}\n`);
-  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, BigInt(privKey.toString()));  // Chave pública correspondente
+  const publicKey = babyJub.mulPointEscalar(babyJub.Base8, privKey.toString());  // Chave pública correspondente
   console.log(`Public Key 2 ${publicKey}\n`);
 
   const proofE1: Proof = {
@@ -93,12 +94,65 @@ async function main() {
 
   console.log("Objeto original:", originalTransfer);
 
+  const utxo = {
+    owner: publicKey,
+    type: "DREX",
+    amount: 15,
+    nonce: newNonce()
+  }
+  const commitment = await generateCommitment(utxo);
+  console.log("commitment:", commitment);
+
+  const nullifier = await generateNullifier(commitment,privKey);
+  console.log("nullifier:", nullifier);
+
+  const nullifier2 = await generateNullifier("0x05a8bb43bc12094a558d07b616dbd67fd2bd9424bfbc63fc0e153f5319d14824"
+    ,8551855048008782979107013480347516135469250250593118959707731087375201543621n);
+  console.log("nullifier2:", nullifier2);
+  //commitment: 0x05a8bb43bc12094a558d07b616dbd67fd2bd9424bfbc63fc0e153f5319d14824
+  //nullifier: 0x39c643136780b6c7832c849e7d97770605e09768366ad464a5cd6a15ef399829
 }
 
 main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+
+function newNonce() {
+  return genRandomSalt();
+}
+
+async function generateNullifier(commitment: string, privKey: BigInt){
+  const poseidon = await buildPoseidon();
+  return bigIntToHex(
+    method1(
+      poseidon([
+        hexToBigInt(commitment),
+        BigInt(privKey.toString())
+    ])
+  )
+);
+}
+
+async function generateCommitment(utxo: UTXO){
+  const poseidon = await buildPoseidon();
+  return bigIntToHex(
+    method1(
+      poseidon([
+    hexToBigInt(stringToHex(utxo.type)),
+    hexToBigInt(stringToHex(utxo.amount.toString())),
+    BigInt(utxo.nonce.toString()),
+    method1(utxo.owner[0].buffer),
+    method1(utxo.owner[1].buffer),
+  ])));
+}
+
+function stringToHex(str: string): string {  
+  const hexString = Array.from(str)
+      .map(char => char.charCodeAt(0).toString(16).padStart(2, '0'))
+      .join('');
+  return `0x${hexString}`;
+}
 
 function objectToHex(obj: object): string {
   const jsonString = JSON.stringify(obj);

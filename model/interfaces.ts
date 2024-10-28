@@ -1,4 +1,6 @@
-import { Point } from "@zk-kit/baby-jubjub";
+import { Point } from "circomlibjs";
+
+
 
 export interface Proof {
   proofType: string;
@@ -8,6 +10,13 @@ export interface Proof {
 export interface Input {
   secret: string;
   proof: Proof;
+}
+
+export interface UTXO {
+  owner: Point;
+  type: string;
+  amount: number;
+  nonce: BigInt;
 }
 
 export interface Output {
@@ -58,7 +67,7 @@ export interface TradeProposalExecute {
 
 export interface PublicKey {
   packed: bigint,
-  unpacked: Point<bigint>
+  //unpacked: Point<bigint>
 }
 
 export interface KeyPair {
