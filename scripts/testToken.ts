@@ -42,7 +42,7 @@ import { buildInputs } from "./Inputs";
 const circom_tester = require("circom_tester");
 const wasm_tester = circom_tester.wasm;
 
-async function main() { 
+async function main() {
   const babyJub = await buildBabyjub();
 
   const privKeyBob: string = generatePrivKey();
@@ -50,7 +50,7 @@ async function main() {
 
   const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, privKeyBob); // Chave pública correspondente
   const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, privKeyAlice);
-  
+
   const utxo = {
     owner: publicKeyAlice.toString(),
     type: "DREX",
@@ -85,30 +85,18 @@ async function main() {
     amount: 15,
     nonce: genRandomSalt().toString(),
   };
+
   let transfer0: Partial<Transfer> = {};
+
   const nonce0 = BigInt(genKeypair().privKey.toString());
   const secret0 = await getSecret(utxoA, publicKeyAlice, nonce0);
   const nonce1 = BigInt(genKeypair().privKey.toString());
   const secret1 = await getSecret(utxoB, publicKeyAlice, nonce1);
-  transfer0.inputs = await buildInputs([secret0,secret1],privKeyAlice);
-  console.log(transfer0);
-  transfer0.outputs = await buildOutputs([utxoC,utxoD]);
-  console.log(transfer0);
-  
-    
-  const commitment = await generateCommitment5(secret0);
 
-  const c1 = uint8R2bigInt(secret0.c1);
-
-  console.log(`commitment ${commitment}\n`);
-  const x: string[] = [c1, secret0.c2];
-  console.log(`x ${x}\n`);
-  const PoseidonHasher = new Circuit("poseidon_hasher");
-  const { proofJson, publicSignals } = await PoseidonHasher.generateProofGrowth16({ x: x });
-  console.log(publicSignals);
-  console.log(proofJson);  
-  const res = await PoseidonHasher.verifyProofGrowth16(proofJson, [commitment]);
-  res === true ? console.log("Verification  OK") : console.log("Invalid  proof");
+  transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);
+  console.log(transfer0);
+  transfer0.outputs = await buildOutputs([utxoC, utxoD]);
+  console.log(transfer0);
 
   /*const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     { x: x },
@@ -126,8 +114,8 @@ async function main() {
   const pk: BabyJubJubPoint = await pointMulBase(sk);
   const Pubkey = new Circuit("pubkey");
   //const { proofJson, publicSignals } = await Pubkey.generateProofPlonk({ sk: sk });
- // console.log(publicSignals);
-  //console.log(proofJson);  
+  // console.log(publicSignals);
+  //console.log(proofJson);
   //const resPubkey = await Pubkey.verifyProofPlonk(proofJson, [pk.x, pk.y]);
 
   //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
@@ -147,70 +135,18 @@ async function main() {
     field.toObject(publicKeyAlice[0]).toString() +
     field.toObject(publicKeyBob[1]).toString();
   console.log(`Public Key other other ${publicKeyAliceFormatted}\n`);
-
-  const proofE1: Proof = {
-    proofType: "ownership",
-    proofValue: "proofOwnershipE1",
-  };
-  const inputE1: Input = {
-    secret: "secretE1",
-    proof: proofE1,
-  };
-  const inputE2: Input = {
-    secret: "secretE2",
-    proof: proofE1,
-  };
-  let transfer: Partial<Transfer> = {};
-  transfer.inputs = [];
-  transfer.outputs = [];
-  transfer.inputs?.push(inputE1);
-  transfer.inputs?.push(inputE2); 
-  transfer.secretAudit = "teste";
-  transfer.massConservationProof = proofE1;
-  transfer.nonRepudiationProof = proofE1;
-
   //let keypairAlice = genKeypair();
   //let keypairBob = genKeypair();
 
   //const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, keypairAlice.privKey.toString());
   //const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, keypairBob.privKey.toString());
 
-  console.log("UTXO:", utxo);
   const nonce = BigInt(genKeypair().privKey.toString());
   const secret = await getSecret(utxo, publicKeyBob, nonce);
-  console.log("Secret:", secret);
-
-  const decryptedMessage = await decryptMessage(BigInt(privKeyBob), secret);
-  console.log("Decrypted Message:", decryptedMessage.toString());
-
-  //const originalTransfer = hexToObject<Transfer>(bigIntToHex(decryptedMessage));
-
- // console.log("Objeto original:", originalTransfer);
-
-  const commitment0 = await generateCommitment(secret);
-  console.log("commitment:", commitment0);
-
-  const commitment2 = await generateCommitment2(secret);
-  console.log("commitment2:", commitment2);
-
-  //const commitment3 = await generateCommitment3(secret.toString());
-  //console.log("commitment3:", commitment3);
-
-  const commitment4 = await generateCommitment4(secret);
-  console.log("commitment4:", commitment4);
-
   // utxo, secret, chave privada -> secret + hash = commitment, commitment + privKey = nullifier
   /*  1 - dado o utxo o circuito deve verificar se a chave privada corresponde a chave publica
     2 - o circuito deve verificar se o nullifier informado corresponde ao gerado
  */
-  const nullifier = await generateNullifier(commitment0, BigInt(privKeyAlice));
-  console.log("nullifier:", nullifier);
-
-  // const nullifier2 = await generateNullifier("0x05a8bb43bc12094a558d07b616dbd67fd2bd9424bfbc63fc0e153f5319d14824"
-  //  ,8551855048008782979107013480347516135469250250593118959707731087375201543621n);
-  //console.log("nullifier2:", nullifier2);
-  //commitment: 0x05a8bb43bc12094a558d07b616dbd67fd2bd9424bfbc63fc0e153f5319d14824
-  //nullifier: 0x39c643136780b6c7832c849e7d97770605e09768366ad464a5cd6a15ef399829
 
   /* describe("ECDSAPrivToPub", function () {
     this.timeout(1000 * 1000);
@@ -290,15 +226,6 @@ async function generateCommitment4(secret: any) {
   );
 }
 
-async function generateCommitment5(secret: any) {
-  const poseidon = await buildPoseidon();
-  return poseidon2([
-    uint8R2bigInt(secret.c1),
-    //0,
-    secret.c2,
-  ]);
-}
-
 function hexToObject<T>(hexString: string): T {
   const strippedHex = hexString.startsWith("0x")
     ? hexString.slice(2)
@@ -310,28 +237,3 @@ function hexToObject<T>(hexString: string): T {
   return JSON.parse(jsonString);
 }
 
-async function encryptMessage(publicKey: any, message: bigint): Promise<any> {
-  console.log(`message -> ${message}\n`);
-  const ff = require("ffjavascript");
-
-  const poseidon = await buildPoseidon();
-  const babyJub = await buildBabyjub();
-  // Gera um nonce aleatório
-  const r = BigInt(genKeypair().privKey.toString());
-  console.log(`R -> ${r}\n`);
-  // c1 = r * G, onde G é o gerador da BabyJubJub
-  const c1 = babyJub.mulPointEscalar(babyJub.Base8, r);
-  console.log(`C1 -> ${c1}\n`);
-  // P = r * PublicKey
-  const sharedPoint = babyJub.mulPointEscalar(publicKey, r);
-  console.log(`sharedPoint -> ${sharedPoint}\n`);
-  // Usa a coordenada x do ponto compartilhado como uma "chave" e a mistura com a mensagem
-  const sharedKey = poseidon([sharedPoint[0]]);
-  console.log(`sharedKey -> ${sharedKey}\n`);
-
-  let bigint = uint8R2bigInt(sharedKey); // 42n
-
-  const c2 = ff.Scalar.add(message, bigint);
-
-  return { c1, c2 };
-}

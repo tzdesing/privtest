@@ -36,10 +36,11 @@ export interface OutputDeposit {
 
 export interface Transfer {
   inputs: Input[];
+  merkleRoot: string;
   outputs: Output[];
-  secretAudit: string;
-  massConservationProof: Proof;
-  nonRepudiationProof: Proof;
+  massConservationProof: any;
+  auditSecret: string;
+  auditProof: any;
 }
 
 export interface Deposit {

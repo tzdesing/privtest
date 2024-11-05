@@ -36,14 +36,9 @@ export const generateCommitment = async (secret: any) => {
   );
 };
 
-export const generateCommitment5= async (secret: any) => {
-    //const poseidon = await buildPoseidon();
-    return poseidon2([
-      uint8R2bigInt(secret.c1),
-      //0,
-      secret.c2,
-    ]);
-  }
+export const generateCommitment5 = async (secret: any) => {
+  return poseidon2([uint8R2bigInt(secret.c1), secret.c2]);
+};
 
 export const encryptMessage = async (
   publicKey: any,
@@ -158,7 +153,7 @@ export const decryptMessage = async (
   let bigint = uint8R2bigInt(sharedKey);
   // Recupera a mensagem original
   const message = ff.Scalar.sub(ciphertext.c2, bigint);
-  
+
   return bigIntToHex(message);
 };
 /*
@@ -173,7 +168,7 @@ export default function hexToObject<T>(hexString: string):T  {
     return JSON.parse(jsonString);
   }*/
 
-export default function hexToObject<T>(hexString: string): T  {
+export default function hexToObject<T>(hexString: string): T {
   try {
     const strippedHex = hexString.startsWith("0x")
       ? hexString.slice(2)
