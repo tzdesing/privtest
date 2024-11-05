@@ -13,10 +13,10 @@ export interface Input {
 }
 
 export interface UTXO {
-  owner: Point;
+  owner: any;
   type: string;
   amount: number;
-  nonce: BigInt;
+  nonce: string;
 }
 
 export interface Output {
