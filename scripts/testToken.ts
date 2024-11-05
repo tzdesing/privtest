@@ -85,16 +85,14 @@ async function main() {
     amount: 15,
     nonce: genRandomSalt().toString(),
   };
-
-  let transfer0: Partial<Transfer> = {};
-
   const nonce0 = BigInt(genKeypair().privKey.toString());
   const secret0 = await getSecret(utxoA, publicKeyAlice, nonce0);
   const nonce1 = BigInt(genKeypair().privKey.toString());
   const secret1 = await getSecret(utxoB, publicKeyAlice, nonce1);
+  
+  let transfer0: Partial<Transfer> = {};
 
-  transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);
-  console.log(transfer0);
+  transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);  
   transfer0.outputs = await buildOutputs([utxoC, utxoD]);
   console.log(transfer0);
 
@@ -109,16 +107,15 @@ async function main() {
   const res = await snarkjs.groth16.verify(vKey, [commitment], proof);
   res === true ? console.log("Verification OK") : console.log("Invalid proof");*/
   //================================================================================================
-
-  const sk: string = generatePrivKey();
-  const pk: BabyJubJubPoint = await pointMulBase(sk);
+ 
+  const pk: BabyJubJubPoint = await pointMulBase(privKeyAlice);
   const Pubkey = new Circuit("pubkey");
-  //const { proofJson, publicSignals } = await Pubkey.generateProofPlonk({ sk: sk });
+  const { proofJson, publicSignals } = await Pubkey.generateProofGrowth16({ sk: privKeyAlice });
   // console.log(publicSignals);
-  //console.log(proofJson);
-  //const resPubkey = await Pubkey.verifyProofPlonk(proofJson, [pk.x, pk.y]);
+  console.log(proofJson);
+  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [pk.x, pk.y]);
 
-  //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
+  resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
 
   //const { privKey, pubKey } = genKeypair();
   //const formattedPrivateKey = formatPrivKeyForBabyJub(privKey);
