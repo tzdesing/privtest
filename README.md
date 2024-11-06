@@ -88,3 +88,8 @@ This project was made by :
 - [Juliano Sales](https://github.com/tzdesing)
 - [AAAA](https://github.com/AAAA)
 - [BBBB](https://github.com/BBBB)
+
+
+1 - circom c2_verify.circom --wasm --r1cs --sym -o ../build
+2 - snarkjs groth16 setup ../build/circuits/c2_verify/c2_verify.r1cs powersOfTau28_hez_final_15.ptau c2_verify.zkey
+3 - npx snarkjs zkey export verificationkey ./build/circuits/c2_verify/c2_verify.zkey c2_verify.vkey.json

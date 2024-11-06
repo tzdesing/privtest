@@ -54,7 +54,7 @@ export const encryptMessage = async (
   // c1 = nonce * G, onde G é o gerador da BabyJubJub
   const c1 = babyJub.mulPointEscalar(babyJub.Base8, nonce);
   console.log(`C1 -> ${c1}\n`);
-  // P = nonce * PublicKey
+  // P = nonce * PublicKey não circom ainda
   const sharedPoint = babyJub.mulPointEscalar(publicKey, nonce);
   console.log(`sharedPoint -> ${sharedPoint}\n`);
   // Usa a coordenada x do ponto compartilhado como uma "chave" e a mistura com a mensagem

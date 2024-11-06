@@ -24,12 +24,10 @@ import {
 import { Input, Output, Proof, Transfer, UTXO } from "../model/interfaces";
 import {
   BabyJubJubPoint,
-  bigIntToHex,
-  decryptMessage,
-  generateCommitment,
-  generateNullifier,
   generatePrivKey,
   getSecret,
+  hexToBigInt,
+  objectToHex,
   pointMulBase,
   uint8R2bigInt,
 } from "./Functions";
@@ -92,16 +90,19 @@ async function main() {
     amount: 15,
     nonce: genRandomSalt().toString(),
   };
-  const nonce0 = BigInt(genKeypair().privKey.toString());
+  const nonce0 = BigInt(generatePrivKey());
+  console.log(`nonce0 -> ${nonce0}\n`);
+  console.log(`nonce0 -> ${nonce0.toString(2)}\n`);
+  
   const secret0 = await getSecret(utxoA, publicKeyAlice, nonce0);
   const nonce1 = BigInt(genKeypair().privKey.toString());
   const secret1 = await getSecret(utxoB, publicKeyAlice, nonce1);
   
-  let transfer0: Partial<Transfer> = {};
+  //let transfer0: Partial<Transfer> = {};
 
-  transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);  
-  transfer0.outputs = await buildOutputs([utxoC, utxoD]);
-  console.log(transfer0);
+  //transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);  
+  //transfer0.outputs = await buildOutputs([utxoC, utxoD]);
+  //console.log(transfer0);
 
   /*const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     { x: x },
@@ -114,23 +115,65 @@ async function main() {
   const res = await snarkjs.groth16.verify(vKey, [commitment], proof);
   res === true ? console.log("Verification OK") : console.log("Invalid proof");*/
   //================================================================================================
- //TODO normalizar public keys
-  const pk: BabyJubJubPoint = await pointMulBase(privKeyAlice);
-  const Pubkey = new Circuit("pubkey");
-  const { proofJson, publicSignals } = await Pubkey.generateProofGrowth16({ sk: privKeyAlice });
-  // console.log(publicSignals);
-  // console.log(publicSignals);
-  console.log(proofJson);
-  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [babyJub.F.toObject(publicKeyAlice[0]).toString(), babyJub.F.toObject(publicKeyAlice[1]).toString()]);
+ 
+  //const Pubkey = new Circuit("pubkey");
+  //const { proofJson, publicSignals } = await Pubkey.generateProofGrowth16({ sk: privKeyAlice });  
+  //console.log(publicSignals);
+ //console.log(proofJson);
+  //const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [babyJub.F.toObject(publicKeyAlice[0]).toString(), babyJub.F.toObject(publicKeyAlice[1]).toString()]);
 
-  resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
+  //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
+
+  //const C1 = new Circuit("pubkey");
+  //const { proofJson, publicSignals } = await C1.generateProofGrowth16({ sk: nonce0.toString() });  
+  //console.log(publicSignals);
+  //console.log(proofJson);
+  //const resC1 = await C1.verifyProofGrowth16(proofJson, [babyJub.F.toObject(secret0.c1[0]).toString(), babyJub.F.toObject(secret0.c1[1]).toString()]);
+
+  //resC1 === true ? console.log("Verification C1 OK") : console.log("Invalid C1 proof");
+  const sharedPoint = babyJub.mulPointEscalar(publicKeyAlice, nonce0);
+  const C2 = new Circuit("c2_verify");
+  const { proofJson, publicSignals } = await C2.generateProofGrowth16(
+    { 
+      sharedPointX: babyJub.F.toObject(sharedPoint[0]).toString(), message: hexToBigInt(objectToHex(utxoA))
+    }
+  );  
+  console.log(publicSignals);
+  console.log(proofJson);
+  const resC2 = await C2.verifyProofGrowth16(proofJson, secret0.c2);
+
+  resC2 === true ? console.log("Verification C2 OK") : console.log("Invalid C2 proof");
+
+//=======================================================================
+const array = []
+const size = 253
+for (let i = 0; i < size; i++) {
+  array.push(0)
+}
+  const SecretVerify = new Circuit("secret_verify");
+  const { proofJsonV, publicSignalsV } = await SecretVerify.generateProofGrowth16({ 
+    pubKeyX: BigInt(babyJub.F.toObject(publicKeyAlice[0]).toString()),
+    pubKeyY: BigInt(babyJub.F.toObject(publicKeyAlice[1]).toString()),    
+    message: hexToBigInt(objectToHex(utxoA)),
+    e:array,
+    r: nonce0
+   });
+  // console.log(publicSignals);
+  // console.log(publicSignals);
+  console.log(proofJsonV);
+  const resSecretVerify = await SecretVerify.verifyProofGrowth16(proofJsonV, [uint8R2bigInt(secret0.c1[0]),uint8R2bigInt(secret0.c1[1]),secret0.c2]);
+
+  resSecretVerify === true ? console.log("Verification SecretVerify OK") : console.log("Invalid SecretVerify proof");
+
+
+
 
   //const { privKey, pubKey } = genKeypair();
   //const formattedPrivateKey = formatPrivKeyForBabyJub(privKey);
 
   //const privateKey = BigInt(privKey.toString());//ff.Scalar.random();  // Chave privada do receptor
   //console.log(`Private Key 2 ${privateKey}\n`);
-  const field = babyJub.F;
+  //const field = babyJub.F;
   // const publicKey = babyJub.mulPointEscalar(babyJub.Base8, privKey);  // Chave pública correspondente
   //console.log(`Public Key ${publicKey}\n`);
 
@@ -142,8 +185,8 @@ async function main() {
   //const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, keypairAlice.privKey.toString());
   //const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, keypairBob.privKey.toString());
 
-  const nonce = BigInt(genKeypair().privKey.toString());
-  const secret = await getSecret(utxo, publicKeyBob, nonce);
+  //const nonce = BigInt(genKeypair().privKey.toString());
+  //const secret = await getSecret(utxo, publicKeyBob, nonce);
   // utxo, secret, chave privada -> secret + hash = commitment, commitment + privKey = nullifier
   /*  1 - dado o utxo o circuito deve verificar se a chave privada corresponde a chave publica
     2 - o circuito deve verificar se o nullifier informado corresponde ao gerado
