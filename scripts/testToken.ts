@@ -51,6 +51,13 @@ async function main() {
   const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, privKeyBob); // Chave pública correspondente
   const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, privKeyAlice);
 
+  //const publicKeyBob : BabyJubJubPoint = await pointMulBase(privKeyBob);  // Chave pública correspondente
+  //const publicKeyAlice : BabyJubJubPoint = await pointMulBase(privKeyAlice);
+ 
+  console.log(`pk1 -> ${publicKeyBob}\n`);
+  console.log(`pk2 -> ${publicKeyAlice.toString()}\n`);
+ 
+
   const utxo = {
     owner: publicKeyAlice.toString(),
     type: "DREX",
@@ -59,14 +66,14 @@ async function main() {
   };
 
   const utxoA: UTXO = {
-    owner: publicKeyAlice.toString(),
+    owner: publicKeyAlice,
     type: "DREX",
     amount: 10,
     nonce: genRandomSalt().toString(),
   };
 
   const utxoB: UTXO = {
-    owner: publicKeyAlice.toString(),
+    owner: publicKeyAlice,
     type: "DREX",
     amount: 10,
     nonce: genRandomSalt().toString(),
@@ -107,13 +114,14 @@ async function main() {
   const res = await snarkjs.groth16.verify(vKey, [commitment], proof);
   res === true ? console.log("Verification OK") : console.log("Invalid proof");*/
   //================================================================================================
- 
+ //TODO normalizar public keys
   const pk: BabyJubJubPoint = await pointMulBase(privKeyAlice);
   const Pubkey = new Circuit("pubkey");
   const { proofJson, publicSignals } = await Pubkey.generateProofGrowth16({ sk: privKeyAlice });
   // console.log(publicSignals);
+  // console.log(publicSignals);
   console.log(proofJson);
-  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [pk.x, pk.y]);
+  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [babyJub.F.toObject(publicKeyAlice[0]).toString(), babyJub.F.toObject(publicKeyAlice[1]).toString()]);
 
   resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
 
@@ -127,11 +135,7 @@ async function main() {
   //console.log(`Public Key ${publicKey}\n`);
 
   //console.log(`Public Key other print ${ field.toObject(publicKey[0]).toString(), field.toObject(publicKey[1]).toString() }\n`);
-
-  const publicKeyAliceFormatted =
-    field.toObject(publicKeyAlice[0]).toString() +
-    field.toObject(publicKeyBob[1]).toString();
-  console.log(`Public Key other other ${publicKeyAliceFormatted}\n`);
+  
   //let keypairAlice = genKeypair();
   //let keypairBob = genKeypair();
 

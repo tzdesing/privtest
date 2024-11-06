@@ -1,5 +1,5 @@
 import hexToObject, { decryptMessage, generateCommitment, generateCommitment5, generateNullifier, getSecret, uint8R2bigInt } from "./Functions";
-import { Input, Transfer } from "./Interfaces";
+import { Input, Transfer, UTXO } from "./Interfaces";
 import { Circuit } from "./Circuit";
 
 export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]> => {
@@ -7,7 +7,8 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
   const PoseidonHasher = new Circuit("poseidon_hasher");
   for (const secret of secrets) {
     const utxo= await decryptMessage(BigInt(privKey), secret );
-    console.log("Decrypted Message:",hexToObject<Transfer>(utxo));
+    console.log("Decrypted Message Hex:",utxo);
+    console.log("Decrypted Message:",hexToObject<UTXO>(utxo));
     //TODO senão decriptar quebrar     
     const commitment = await generateCommitment5(secret);
     //console.log("commitment:", commitment);
@@ -20,11 +21,8 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
     const res = await PoseidonHasher.verifyProofGrowth16(proofJson, [commitment]);
     //TODO se false quebrar
     res === true ? console.log("Verification  OK") : console.log("Invalid  proof");
-
-    //TODO ajustar pra funcionar com 5
-    const commitmentErr = await generateCommitment(secret);
-
-    const nullifier = await generateNullifier(commitmentErr, BigInt(privKey));
+    
+    const nullifier = await generateNullifier(commitment, BigInt(privKey));
     console.log("nullifier:", nullifier);
     const input: Input = {
         ownershipProof: proofJson,

@@ -194,13 +194,13 @@ export default function hexToObject<T>(hexString: string): T {
 }
 
 export const generateNullifier = async (
-  commitment: string,
+  commitment: bigint,
   privKey: BigInt
 ) => {
   const poseidon = await buildPoseidon();
   return bigIntToHex(
     uint8R2bigInt(
-      poseidon([hexToBigInt(commitment), BigInt(privKey.toString())])
+      poseidon([commitment, BigInt(privKey.toString())])
     )
   );
 };
