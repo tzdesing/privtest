@@ -39,7 +39,7 @@ export interface Transfer {
   merkleRoot: string;
   outputs: Output[];
   massConservationProof: any;
-  auditSecret: string;
+  auditSecret: any;
   auditProof: any;
 }
 

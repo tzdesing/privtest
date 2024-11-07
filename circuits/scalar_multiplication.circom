@@ -1,4 +1,4 @@
-pragma circom 2.1.6;
+pragma circom 2.2.0;
 
 include "../node_modules/circomlib/circuits/poseidon.circom";
 include "../node_modules/circomlib/circuits/babyjub.circom";
@@ -6,9 +6,9 @@ include "../node_modules/circomlib/circuits/mux1.circom";
 include "../node_modules/circomlib/circuits/bitify.circom";
 include "../node_modules/circomlib/circuits/escalarmulfix.circom";
 
-template ValidatC2 ( ){
-    signal input pubX;  
-    signal input pubY;  
+template ValidatC2 (pubX, pubY){
+    signal input c2;  
+    signal input c2;  
     signal input c2;        
     signal input message;       
     signal input r;

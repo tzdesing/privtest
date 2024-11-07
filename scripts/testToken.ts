@@ -1,6 +1,6 @@
 import { viem } from "hardhat";
 import path = require("path");
-
+import chalk, { Chalk } from "chalk";
 import { parseEther, formatEther } from "viem";
 import { ethers } from "ethers";
 
@@ -26,6 +26,7 @@ import {
   BabyJubJubPoint,
   generatePrivKey,
   getSecret,
+  getSecretAudit,
   hexToBigInt,
   objectToHex,
   pointMulBase,
@@ -37,43 +38,36 @@ import { poseidon2 } from "poseidon-lite/poseidon2";
 import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
 import { buildInputs } from "./Inputs";
+import { buildMassConservationProof } from "./MassConservation";
+import { genAuditProof } from "./Audit";
 const circom_tester = require("circom_tester");
 const wasm_tester = circom_tester.wasm;
 
 async function main() {
+  const readline = require('readline-sync');
+
+
   const babyJub = await buildBabyjub();
 
   const privKeyBob: string = generatePrivKey();
   const privKeyAlice: string = generatePrivKey();
+  const privKeyAdmin: string = generatePrivKey();
 
   const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, privKeyBob); // Chave pública correspondente
   const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, privKeyAlice);
-
-  //const publicKeyBob : BabyJubJubPoint = await pointMulBase(privKeyBob);  // Chave pública correspondente
-  //const publicKeyAlice : BabyJubJubPoint = await pointMulBase(privKeyAlice);
- 
-  console.log(`pk1 -> ${publicKeyBob}\n`);
-  console.log(`pk2 -> ${publicKeyAlice.toString()}\n`);
- 
-
-  const utxo = {
-    owner: publicKeyAlice.toString(),
-    type: "DREX",
-    amount: 15,
-    nonce: genRandomSalt().toString(),
-  };
+  const publicKeyAdmin = babyJub.mulPointEscalar(babyJub.Base8, privKeyAdmin);
 
   const utxoA: UTXO = {
     owner: publicKeyAlice,
     type: "DREX",
-    amount: 10,
+    amount: 9,
     nonce: genRandomSalt().toString(),
   };
 
   const utxoB: UTXO = {
     owner: publicKeyAlice,
     type: "DREX",
-    amount: 10,
+    amount: 11,
     nonce: genRandomSalt().toString(),
   };
 
@@ -90,19 +84,141 @@ async function main() {
     amount: 15,
     nonce: genRandomSalt().toString(),
   };
-  const nonce0 = BigInt(generatePrivKey());
-  console.log(`nonce0 -> ${nonce0}\n`);
-  console.log(`nonce0 -> ${nonce0.toString(2)}\n`);
+
+  console.log(
+    chalk.greenBright(
+      " Chave Pública Alice -> \n",babyJub.F.toObject(publicKeyAlice[0]).toString() +"\n"
+    )
+  );
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Chave Pública Bob -> \n",babyJub.F.toObject(publicKeyBob[0]).toString() +"\n"
+    )
+  );
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Chave Pública Autoridade do Contrato (Admin) -> \n",babyJub.F.toObject(publicKeyAdmin[0]).toString() +"\n"
+    )
+  );
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice possue 2 UTXO's (9 e 11) deseja transferir 15 para Bob, e receber 5 de troco\n"
+    )
+  );
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice deve gerar os anuladores e as respectivas provas de propriedade, e anexar como Entradas no objeto de transferencia\n"
+    )
+  );
   
+  readline.question("Continua...");
+  
+  const nonce0 = BigInt(generatePrivKey());  
   const secret0 = await getSecret(utxoA, publicKeyAlice, nonce0);
   const nonce1 = BigInt(genKeypair().privKey.toString());
   const secret1 = await getSecret(utxoB, publicKeyAlice, nonce1);
-  
-  //let transfer0: Partial<Transfer> = {};
+  const nonce2 = BigInt(generatePrivKey());  
+  let transfer0: Partial<Transfer> = {};
 
-  //transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);  
-  //transfer0.outputs = await buildOutputs([utxoC, utxoD]);
-  //console.log(transfer0);
+  transfer0.inputs = await buildInputs([secret0, secret1], privKeyAlice);  
+    
+  console.log(
+    chalk.greenBright(
+      " Eis o objeto preenchido parcialmente ->\n"
+    )
+  );
+
+  console.log(transfer0);
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice deve formular os tokens de saida , assim como os secrets correspondentes, e anexar no objeto de transferencia\n"
+    )
+  );
+  
+  readline.question("Continua...");
+
+  transfer0.outputs = await buildOutputs([utxoC, utxoD]);
+
+  console.log(
+    chalk.greenBright(
+      " Eis o objeto preenchido parcialmente ->\n"
+    )
+  );
+
+  console.log(transfer0);
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice deve incluir no objeto uma prova de conservação de massa, e anexar ao objeto de transferencia\n"
+    )
+  );
+  
+  readline.question("Continua...");
+
+  transfer0.massConservationProof = await buildMassConservationProof([utxoA, utxoB, utxoC, utxoD]);
+
+  console.log(
+    chalk.greenBright(
+      " Eis o objeto preenchido parcialmente ->\n"
+    )
+  );
+
+  console.log(transfer0);
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice deve usar a chave pública da autoridade do contrato e os tokens de entrada e saída para criar o segredo e a prova de auditoria, e anexar ao objeto de transferencia\n"
+    )
+  );
+  const auditSecret = getSecretAudit([utxoA, utxoB, utxoC, utxoD], publicKeyAdmin,nonce2);
+  transfer0.auditSecret = auditSecret;
+  transfer0.auditProof = genAuditProof(auditSecret, publicKeyAdmin);
+
+  console.log(
+    chalk.greenBright(
+      " Eis o objeto preenchido, pronto para ser submetido ->\n"
+    )
+  );
+
+  console.log(transfer0);
+
+  readline.question("Continua...");
+
+  console.log(
+    chalk.greenBright(
+      " Alice submete a transação ao contrato privado na rede\n"
+    )
+  );
+
+  //log do payload
+
+  readline.question("Continua...");
+
+  //log do recibo da transação.
+
+  //verificar merkle tree antes e depois
+  //verificar mapper nullifier antes e depois
+
+  //listener eventos bob e alice
+  //decrifar mensagem e log
 
   /*const { proof, publicSignals } = await snarkjs.groth16.fullProve(
     { x: x },

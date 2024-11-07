@@ -16,6 +16,18 @@ export const getSecret = async (
   );
 };
 
+export const getSecretAudit = async (
+    utxos: object[],
+    pubkey: Point,
+    nonce: bigint
+  ): Promise<any> => {
+    return await encryptMessage(
+      pubkey,
+      hexToBigInt(objectToHex(utxos)), //fazer isso fora e ja receber bigint
+      nonce
+    );
+  };
+
 export const generatePrivKey = (): string => {
   const ff = require("ffjavascript");
   return ff.Scalar.e(
