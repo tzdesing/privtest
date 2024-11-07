@@ -233,3 +233,16 @@ export const uint8R2bigInt = (arr: any) => {
   }
   return ret;
 };
+
+export const bigIntToUint8Array = (num: bigint) => {
+    const bytes = [];
+    
+    // Enquanto o número for maior que zero, separe os bytes
+    while (num > 0n) {
+      bytes.push(Number(num & 0xffn)); // Pega o último byte
+      num >>= 8n;                      // Move 8 bits para a direita
+    }
+  
+    // Cria o Uint8Array e inverte os bytes (para ordem correta)
+    return new Uint8Array(bytes.reverse());
+  };

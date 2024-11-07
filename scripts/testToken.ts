@@ -6,14 +6,8 @@ import { ethers } from "ethers";
 
 import {
   genKeypair,
-  formatPrivKeyForBabyJub,
   genRandomSalt,
 } from "maci-crypto";
-import {
-  poseidonEncrypt,
-  poseidonDecrypt,
-  poseidonDecryptWithoutCheck,
-} from "@zk-kit/poseidon-cipher";
 import {
   BabyJub,
   buildBabyjub,
@@ -23,63 +17,55 @@ import {
 } from "circomlibjs";
 import { Input, Output, Proof, Transfer, UTXO } from "../model/interfaces";
 import {
-  BabyJubJubPoint,
   generatePrivKey,
   getSecret,
   getSecretAudit,
   hexToBigInt,
   objectToHex,
-  pointMulBase,
   uint8R2bigInt,
 } from "./Functions";
-//import { Scalar } from "@toruslabs/ffjavascript";
-import { expect, assert } from "chai";
-import { poseidon2 } from "poseidon-lite/poseidon2";
 import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
 import { buildInputs } from "./Inputs";
 import { buildMassConservationProof } from "./MassConservation";
 import { genAuditProof } from "./Audit";
-const circom_tester = require("circom_tester");
-const wasm_tester = circom_tester.wasm;
+import { sendTransaction } from "./Transaction";
 
 async function main() {
   const readline = require('readline-sync');
-
-
   const babyJub = await buildBabyjub();
 
   const privKeyBob: string = generatePrivKey();
   const privKeyAlice: string = generatePrivKey();
   const privKeyAdmin: string = generatePrivKey();
 
-  const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, privKeyBob); // Chave pública correspondente
+  const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, privKeyBob);
   const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, privKeyAlice);
   const publicKeyAdmin = babyJub.mulPointEscalar(babyJub.Base8, privKeyAdmin);
 
   const utxoA: UTXO = {
-    owner: publicKeyAlice,
+    owner: [babyJub.F.toObject(publicKeyAlice[0]).toString(),babyJub.F.toObject(publicKeyAlice[1]).toString()],
     type: "DREX",
     amount: 9,
     nonce: genRandomSalt().toString(),
   };
 
   const utxoB: UTXO = {
-    owner: publicKeyAlice,
+    owner: [babyJub.F.toObject(publicKeyAlice[0]).toString(),babyJub.F.toObject(publicKeyAlice[1]).toString()],
     type: "DREX",
     amount: 11,
     nonce: genRandomSalt().toString(),
   };
 
   const utxoC: UTXO = {
-    owner: publicKeyAlice.toString(),
+    owner: [babyJub.F.toObject(publicKeyAlice[0]).toString(),babyJub.F.toObject(publicKeyAlice[1]).toString()],
     type: "DREX",
     amount: 5,
     nonce: genRandomSalt().toString(),
   };
 
   const utxoD: UTXO = {
-    owner: publicKeyBob.toString(),
+    owner: [babyJub.F.toObject(publicKeyBob[0]).toString(),babyJub.F.toObject(publicKeyBob[1]).toString()],
     type: "DREX",
     amount: 15,
     nonce: genRandomSalt().toString(),
@@ -210,7 +196,11 @@ async function main() {
 
   //log do payload
 
-  readline.question("Continua...");
+  readline.question("Continua...");  
+
+  sendTransaction(<Transfer>transfer0);
+
+  readline.question("Continua..."); 
 
   //log do recibo da transação.
 
@@ -304,10 +294,8 @@ for (let i = 0; i < size; i++) {
   //const nonce = BigInt(genKeypair().privKey.toString());
   //const secret = await getSecret(utxo, publicKeyBob, nonce);
   // utxo, secret, chave privada -> secret + hash = commitment, commitment + privKey = nullifier
-  /*  1 - dado o utxo o circuito deve verificar se a chave privada corresponde a chave publica
-    2 - o circuito deve verificar se o nullifier informado corresponde ao gerado
- */
-
+  
+    process.exit(0);
   /* describe("ECDSAPrivToPub", function () {
     this.timeout(1000 * 1000);
 
