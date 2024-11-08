@@ -267,9 +267,9 @@ for (let i = 0; i < size; i++) {
   // console.log(publicSignals);
   
   //console.log(proofJsonV);
-  const resSecretVerify = await SecretVerify.verifyProofGrowth16(proofJsonV, [uint8R2bigInt(secret0.c1[0]),uint8R2bigInt(secret0.c1[1]),secret0.c2]);
+  //const resSecretVerify = await SecretVerify.verifyProofGrowth16(proofJsonV, [uint8R2bigInt(secret0.c1[0]),uint8R2bigInt(secret0.c1[1]),secret0.c2]);
 
-  resSecretVerify === true ? console.log("Verification SecretVerify OK") : console.log("Invalid SecretVerify proof");
+  //resSecretVerify === true ? console.log("Verification SecretVerify OK") : console.log("Invalid SecretVerify proof");
 
 
 

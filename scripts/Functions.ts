@@ -97,23 +97,6 @@ export const encryptMessage = async (
   return { c0, c2 };
 };
 
-/*export type BabyJubJubPoint = {
-  x: string;
-  y: string;
-};
-
-export const pointMulBase = async (
-  scalar: string
-): Promise<BabyJubJubPoint> => {
-  const babyjubjub = await buildBabyjub();
-  const field = babyjubjub.F;
-  const result = babyjubjub.mulPointEscalar(babyjubjub.Base8, scalar);
-  return {
-    x: field.toObject(result[0]).toString(),
-    y: field.toObject(result[1]).toString(),
-  };
-};*/
-
 export const bigIntToHex = (bigInt: bigint): string => {
   let hexString = bigInt.toString(16);
   if (hexString.length % 2 !== 0) {
@@ -154,11 +137,9 @@ export const decryptMessage = async (
   ] as Point;
   // P = privateKey * c1
   const sharedPoint = babyJub.mulPointEscalar(c1, privateKey);
-
   // Usa a coordenada x do ponto compartilhado como a "chave"
   const sharedKey = poseidon([sharedPoint[0]]);
   //console.log(`sharedKey -> ${sharedKey}\n`);
-
   let bigint = uint8R2bigInt(sharedKey);
   // Recupera a mensagem original
   const message = ff.Scalar.sub(ciphertext.c2, bigint);
@@ -171,7 +152,6 @@ export default function hexToObject<T>(hexString: string): T {
     const strippedHex = hexString.startsWith("0x")
       ? hexString.slice(2)
       : hexString;
-
     // Converte cada par de caracteres hexadecimais em um caractere ASCII, ignorando caracteres de controle
     const jsonString = Array.from(
       { length: strippedHex.length / 2 },

@@ -50,11 +50,7 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
     console.log("pB:", b);
     console.log("pC:", c);
     console.log("inR:", inR);
-
-    /* pA: ownProof[0] as [bigint, bigint],
-            pB: ownProof[1] as [[bigint, bigint], [bigint, bigint]],
-            pC: ownProof[2] as [bigint, bigint] */
-
+    
     const input: Input = {
         ownershipProof: {
             pA: a as [bigint, bigint],
