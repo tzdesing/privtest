@@ -4,10 +4,6 @@ pragma solidity ^0.8;
 import {Groth16Verifier} from "./Groth16Verifier.sol";
 //import {SparseMerkleTree} from "./SparseMerkleTree.sol";
 
-
-/*interface IPoseidon {
-    function hash(bytes32[1] memory input) external view returns (bytes32);
-}*/
 interface IGrothVerifier {
     function verifyProof(
         uint256[2] memory a,
@@ -19,9 +15,7 @@ interface IGrothVerifier {
 
 contract Harpo {
 
-    Groth16Verifier internal verifier;
-
-   // address public s_grothVerifierAddress;
+    Groth16Verifier internal verifier;   
     constructor(Groth16Verifier _verifier) {
         verifier = _verifier;        
     }
@@ -71,11 +65,7 @@ contract Harpo {
             bytes32 nullifier = transfer.inputs[i].nullifier;
             require(!nullifiersUsed[nullifier], "Nullifier ja utilizado");
             nullifiersUsed[nullifier] = true; 
-        }
-        
-        uint256[2] memory fixedSizeInputs;
-
-        //IGrothVerifier verifier = IGrothVerifier(s_grothVerifierAddress); 
+        }                       
 
         for (uint i = 0; i < transfer.inputs.length; i++) {
             require(

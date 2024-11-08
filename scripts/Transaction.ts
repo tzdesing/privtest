@@ -24,5 +24,5 @@ export const sendTransaction = async (transfer: Transfer): Promise<any[]> => {
   console.log("receipt", receipt);
   const commEvents = await harpoContract.getEvents.CommitmentGenerated();
   console.log("commEvents", commEvents);
-  return [""];
+  return commEvents;
 };

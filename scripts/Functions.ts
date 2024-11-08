@@ -1,6 +1,6 @@
 import { buildBabyjub, buildPoseidon, Point } from "circomlibjs";
 import { randomBytes } from "crypto";
-import { poseidon2 } from "poseidon-lite";
+import { poseidon2, poseidon3 } from "poseidon-lite";
 
 export const getSecret = async (
   utxo: object,
@@ -15,16 +15,16 @@ export const getSecret = async (
 };
 
 export const getSecretAudit = async (
-    utxos: object[],
-    pubkey: Point,
-    nonce: bigint
-  ): Promise<any> => {
-    return await encryptMessage(
-      pubkey,
-      hexToBigInt(objectToHex(utxos)), //fazer isso fora e ja receber bigint
-      nonce
-    );
-  };
+  utxos: object[],
+  pubkey: Point,
+  nonce: bigint
+): Promise<any> => {
+  return await encryptMessage(
+    pubkey,
+    hexToBigInt(objectToHex(utxos)), //fazer isso fora e ja receber bigint
+    nonce
+  );
+};
 
 export const generatePrivKey = (): string => {
   const ff = require("ffjavascript");
@@ -47,7 +47,11 @@ export const generateCommitment = async (secret: any) => {
 };
 
 export const generateCommitment5 = async (secret: any) => {
-  return poseidon2([uint8R2bigInt(secret.c1), secret.c2]);
+  return poseidon3([     
+    hexToBigInt(secret.c0[0]),
+    hexToBigInt(secret.c0[1]),
+    secret.c2
+    ]);
 };
 
 export const encryptMessage = async (
@@ -63,22 +67,37 @@ export const encryptMessage = async (
 
   // c1 = nonce * G, onde G é o gerador da BabyJubJub
   const c1 = babyJub.mulPointEscalar(babyJub.Base8, nonce);
-  console.log(`C1 -> ${c1}\n`);
+
+  //console.log(`c10 -> ${c1[0]}\n`);
+
+  const c1x = bigIntToHex(uint8R2bigInt(c1[0]));
+  //console.log(`c1x -> ${c1x}\n`);
+  const c1y = bigIntToHex(uint8R2bigInt(c1[1]));
+
+
+  //const c1bx = bigIntToUint8Array(hexToBigInt(c1x));
+  //console.log(`c1bx -> ${c1bx}\n`);
+
+  //const c3x = babyJub.F.bigIntToUint8ArrayObject(c1[0]).toString();
+  
+  const c0 = [c1x,c1y];
+
+  //console.log(`C1 -> ${c1}\n`);
   // P = nonce * PublicKey não circom ainda
   const sharedPoint = babyJub.mulPointEscalar(publicKey, nonce);
-  console.log(`sharedPoint -> ${sharedPoint}\n`);
+  //console.log(`sharedPoint -> ${sharedPoint}\n`);
   // Usa a coordenada x do ponto compartilhado como uma "chave" e a mistura com a mensagem
   const sharedKey = poseidon([sharedPoint[0]]);
-  console.log(`sharedKey -> ${sharedKey}\n`);
+  //console.log(`sharedKey -> ${sharedKey}\n`);
 
-  let bigint = method1(sharedKey); // 42n
+  let bigint = uint8R2bigInt(sharedKey);
 
   const c2 = ff.Scalar.add(message, bigint);
 
-  return { c1, c2 };
+  return { c0, c2 };
 };
 
-export type BabyJubJubPoint = {
+/*export type BabyJubJubPoint = {
   x: string;
   y: string;
 };
@@ -88,37 +107,13 @@ export const pointMulBase = async (
 ): Promise<BabyJubJubPoint> => {
   const babyjubjub = await buildBabyjub();
   const field = babyjubjub.F;
-  const base8 = [
-    field.e(
-      "5299619240641551281634865583518297030282874472190772894086521144482721001553"
-    ),
-    field.e(
-      "16950150798460657717958625567821834550301663161624707787222815936182638968203"
-    ),
-  ];
   const result = babyjubjub.mulPointEscalar(babyjubjub.Base8, scalar);
   return {
     x: field.toObject(result[0]).toString(),
     y: field.toObject(result[1]).toString(),
   };
-};
+};*/
 
-export const method1 = (arr: any) => {
-  let buf = arr.buffer;
-  let bits = 8n;
-  if (ArrayBuffer.isView(buf)) {
-    bits = BigInt(64);
-  } else {
-    buf = new Uint8Array(buf);
-  }
-
-  let ret = 0n;
-  for (const i of buf.values()) {
-    const bi = BigInt(i);
-    ret = (ret << bits) + bi;
-  }
-  return ret;
-};
 export const bigIntToHex = (bigInt: bigint): string => {
   let hexString = bigInt.toString(16);
   if (hexString.length % 2 !== 0) {
@@ -153,12 +148,16 @@ export const decryptMessage = async (
   const ff = require("ffjavascript");
   const poseidon = await buildPoseidon();
   const babyJub = await buildBabyjub();
+  const c1 = [
+    bigIntToUint8Array(hexToBigInt(ciphertext.c0[0])),
+    bigIntToUint8Array(hexToBigInt(ciphertext.c0[1]))
+  ] as Point;
   // P = privateKey * c1
-  const sharedPoint = babyJub.mulPointEscalar(ciphertext.c1, privateKey);
+  const sharedPoint = babyJub.mulPointEscalar(c1, privateKey);
 
   // Usa a coordenada x do ponto compartilhado como a "chave"
   const sharedKey = poseidon([sharedPoint[0]]);
-  console.log(`sharedKey -> ${sharedKey}\n`);
+  //console.log(`sharedKey -> ${sharedKey}\n`);
 
   let bigint = uint8R2bigInt(sharedKey);
   // Recupera a mensagem original
@@ -166,17 +165,6 @@ export const decryptMessage = async (
 
   return bigIntToHex(message);
 };
-/*
-export default function hexToObject<T>(hexString: string):T  {
-    const strippedHex = hexString.startsWith("0x")
-      ? hexString.slice(2)
-      : hexString;
-  
-    const jsonString = Array.from({ length: strippedHex.length / 2 }, (_, i) =>
-      String.fromCharCode(parseInt(strippedHex.slice(i * 2, i * 2 + 2), 16))
-    ).join("");
-    return JSON.parse(jsonString);
-  }*/
 
 export default function hexToObject<T>(hexString: string): T {
   try {
@@ -209,9 +197,7 @@ export const generateNullifier = async (
 ) => {
   const poseidon = await buildPoseidon();
   return bigIntToHex(
-    uint8R2bigInt(
-      poseidon([commitment, BigInt(privKey.toString())])
-    )
+    uint8R2bigInt(poseidon([commitment, BigInt(privKey.toString())]))
   ).slice(2);
 };
 
@@ -233,14 +219,12 @@ export const uint8R2bigInt = (arr: any) => {
 };
 
 export const bigIntToUint8Array = (num: bigint) => {
-    const bytes = [];
-    
-    // Enquanto o número for maior que zero, separe os bytes
-    while (num > 0n) {
-      bytes.push(Number(num & 0xffn)); // Pega o último byte
-      num >>= 8n;                      // Move 8 bits para a direita
-    }
-  
-    // Cria o Uint8Array e inverte os bytes (para ordem correta)
-    return new Uint8Array(bytes.reverse());
-  };
+  const bytes = [];
+  // Enquanto o número for maior que zero, separe os bytes
+  while (num > 0n) {
+    bytes.push(Number(num & 0xffn)); // Pega o último byte
+    num >>= 8n; // Move 8 bits para a direita
+  }
+  // Cria o Uint8Array e inverte os bytes (para ordem correta)
+  return new Uint8Array(bytes.reverse());
+};

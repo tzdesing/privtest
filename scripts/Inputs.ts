@@ -1,11 +1,8 @@
 import { Input, UTXO } from "../model/interfaces";
-import hexToObject, { decryptMessage, generateCommitment, generateCommitment5, generateNullifier, getSecret, uint8R2bigInt } from "./Functions";
+import hexToObject, { decryptMessage, generateCommitment5, generateNullifier, getSecret, uint8R2bigInt } from "./Functions";
 
 import { genOwnershipProof } from "./Ownership";
-/*
-os secrets recebecidos em transações anteriores
 
-*/
 export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]> => {
   const result: Input[] = [];
   //const PoseidonHasher = new Circuit("poseidon_hasher");
@@ -18,8 +15,8 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
     //TODO senão decriptar quebrar     
     const commitment = await generateCommitment5(secret);
     //console.log("commitment:", commitment);
-    const c1 = uint8R2bigInt(secret.c1);
-    const x: string[] = [c1, secret.c2];
+    //const c1 = uint8R2bigInt(secret.c1);
+    //const x: string[] = [c1, secret.c2];
     //console.log(`x ${x}\n`);    
     //const { proofJson, publicSignals,proofCalldata } = await PoseidonHasher.generateProofGrowth16({ x: x });
     //console.log(publicSignals);

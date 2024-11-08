@@ -1,4 +1,3 @@
-import { genKeypair } from "maci-crypto";
 import { bigIntToUint8Array, generatePrivKey, getSecret, objectToHex, uint8R2bigInt } from "./Functions";
 import { Output, UTXO } from "../model/interfaces";
 
@@ -19,8 +18,8 @@ export const buildOutputs = async (utxos: UTXO[]): Promise<any[]> => {
    
       
       // Converter c1 para uma string hexadecimal única
-      const c1Hex0 = uint8R2bigInt(secret.c1[0]).toString(16);
-      const c1Hex1 = uint8R2bigInt(secret.c1[1]).toString(16);
+      const c1Hex0 = secret.c0[0];
+      const c1Hex1 = secret.c0[1];
       const c2Hex = secret.c2.toString(16);
       
       // Concatenar c1 e c2 em uma única string hexadecimal

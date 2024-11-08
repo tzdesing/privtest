@@ -194,13 +194,11 @@ async function main() {
     chalk.greenBright(
       " Alice submete a transação ao contrato privado na rede\n"
     )
-  );
-
-  //log do payload
+  );  
 
   readline.question("Continua...");  
 
-  await sendTransaction(<Transfer>transfer0);
+  const events = await sendTransaction(<Transfer>transfer0);
 
   readline.question("Continua..."); 
 
@@ -267,8 +265,8 @@ for (let i = 0; i < size; i++) {
     r: nonce0
    });
   // console.log(publicSignals);
-  // console.log(publicSignals);
-  console.log(proofJsonV);
+  
+  //console.log(proofJsonV);
   const resSecretVerify = await SecretVerify.verifyProofGrowth16(proofJsonV, [uint8R2bigInt(secret0.c1[0]),uint8R2bigInt(secret0.c1[1]),secret0.c2]);
 
   resSecretVerify === true ? console.log("Verification SecretVerify OK") : console.log("Invalid SecretVerify proof");
@@ -297,93 +295,10 @@ for (let i = 0; i < size; i++) {
   //const secret = await getSecret(utxo, publicKeyBob, nonce);
   // utxo, secret, chave privada -> secret + hash = commitment, commitment + privKey = nullifier
   
-    process.exit(0);
-  /* describe("ECDSAPrivToPub", function () {
-    this.timeout(1000 * 1000);
-
-    // runs circom compilation
-    let circuit: any;
-    before(async function () {
-        circuit = await wasm_tester(path.join(__dirname, "circuits", "test_ecdsa.circom"));
-    });
-
-    // privkey, pub0, pub1
-    var test_cases: Array<[bigint, bigint, bigint]> = [];
-
-    // 4 randomly generated privkeys
-    var privkeys: Array<bigint> = [88549154299169935420064281163296845505587953610183896504176354567359434168161n,
-                                   37706893564732085918706190942542566344879680306879183356840008504374628845468n,
-                                   90388020393783788847120091912026443124559466591761394939671630294477859800601n,
-                                   110977009687373213104962226057480551605828725303063265716157300460694423838923n];
-     
-
-    var test_ecdsa_instance = function (keys: [bigint, bigint, bigint]) {
-        let privkey = keys[0];
-        let pub0 = keys[1];
-        let pub1 = keys[2];
-
-        var priv_tuple: [bigint, bigint, bigint, bigint] = bigint_to_tuple(privkey);
-        var pub0_tuple: [bigint, bigint, bigint, bigint] = bigint_to_tuple(pub0);
-        var pub1_tuple: [bigint, bigint, bigint, bigint] = bigint_to_tuple(pub1);
-
-        it('Testing privkey: ' + privkey + ' pubkey.x: ' + pub0 + ' pubkey.y: ' + pub1, async function() {
-            let witness = await circuit.calculateWitness({"privkey": priv_tuple});
-            expect(witness[1]).to.equal(pub0_tuple[0]);
-            expect(witness[2]).to.equal(pub0_tuple[1]);
-            expect(witness[3]).to.equal(pub0_tuple[2]);
-            expect(witness[4]).to.equal(pub0_tuple[3]);
-            expect(witness[5]).to.equal(pub1_tuple[0]);
-            expect(witness[6]).to.equal(pub1_tuple[1]);
-            expect(witness[7]).to.equal(pub1_tuple[2]);
-            expect(witness[8]).to.equal(pub1_tuple[3]);
-            await circuit.checkConstraints(witness);
-        });
-    }
-
-    test_cases.forEach(test_ecdsa_instance);
-  });*/
+    process.exit(0);  
 }
 
 main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
-
-async function generateCommitment2(secret: any) {
-  const poseidon = await buildPoseidon();
-  return poseidon([
-    uint8R2bigInt(secret.c1[0].buffer),
-    uint8R2bigInt(secret.c1[1].buffer),
-    secret.c2,
-  ]);
-}
-
-async function generateCommitment3(secret: string[]) {
-  const poseidon = await buildPoseidon();
-  const field = poseidon.F;
-  const result = poseidon(secret);
-  return field.toObject(result).toString();
-}
-
-async function generateCommitment4(secret: any) {
-  const poseidon = await buildPoseidon();
-  return uint8R2bigInt(
-    poseidon([
-      uint8R2bigInt(secret.c1[0].buffer),
-      uint8R2bigInt(secret.c1[1].buffer),
-      secret.c2,
-    ])
-  );
-}
-
-function hexToObject<T>(hexString: string): T {
-  const strippedHex = hexString.startsWith("0x")
-    ? hexString.slice(2)
-    : hexString;
-
-  const jsonString = Array.from({ length: strippedHex.length / 2 }, (_, i) =>
-    String.fromCharCode(parseInt(strippedHex.slice(i * 2, i * 2 + 2), 16))
-  ).join("");
-  return JSON.parse(jsonString);
-}
-
