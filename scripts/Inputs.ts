@@ -8,10 +8,10 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
   //const PoseidonHasher = new Circuit("poseidon_hasher");
   for (const secret of secrets) {
     const utxo : UTXO = hexToObject<UTXO>(await decryptMessage(BigInt(privKey), secret ));
-    console.log("Decrypted Message Hex:",utxo);
+    //console.log("Decrypted Message Hex:",utxo);
 
     const ownProof = await genOwnershipProof(utxo,privKey);
-    console.log("prova conhecimento chave privada:",ownProof);
+    //console.log("prova conhecimento chave privada:",ownProof);
     //TODO senão decriptar quebrar     
     const commitment = await generateCommitment5(secret);
     //console.log("commitment:", commitment);
@@ -46,10 +46,10 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
       inR.push(argv[i]);
     }
 
-    console.log("pA:", a);
-    console.log("pB:", b);
-    console.log("pC:", c);
-    console.log("inR:", inR);
+    //console.log("pA:", a);
+    //console.log("pB:", b);
+    //console.log("pC:", c);
+    //console.log("inR:", inR);
     
     const input: Input = {
         ownershipProof: {

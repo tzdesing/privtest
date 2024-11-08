@@ -15,6 +15,7 @@ import {
   getSecretAudit,
   hexToBigInt,
   objectToHex,
+  to32ByteHex,
 } from "./Functions";
 import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
@@ -166,8 +167,11 @@ async function main() {
       " Alice deve usar a chave pública da autoridade do contrato e os tokens de entrada e saída para criar o segredo e a prova de auditoria, e anexar ao objeto de transferencia\n"
     )
   );
+
+  // Example usage
+  
   const auditSecret = await getSecretAudit([utxoA, utxoB, utxoC, utxoD], publicKeyAdmin,nonce2);
-  transfer0.auditSecret = `0x${"1f9dd0919c21c990e6304f39677d4ddc559d429de7497c15b9f57545dee156b2"}`;
+  transfer0.auditSecret = `0x${to32ByteHex("mocka")}`;
   transfer0.auditProof = await genAuditProof(auditSecret, publicKeyAdmin);
 
   console.log(
@@ -176,7 +180,7 @@ async function main() {
     )
   );
 
-  transfer0.merkleRoot = `0x${"1f9dd0919c21c990e6304f39677d4ddc559d429de7497c15b9f57545dee156b2"}`;
+  transfer0.merkleRoot = `0x${to32ByteHex("mockroota")}`;
 
   console.log(transfer0);
 
@@ -271,3 +275,5 @@ main().catch((err) => {
   console.error(err);
   process.exitCode = 1;
 });
+
+

@@ -47,11 +47,11 @@ export const generateCommitment = async (secret: any) => {
 };
 
 export const generateCommitment5 = async (secret: any) => {
-  return poseidon3([     
+  return poseidon3([
     hexToBigInt(secret.c0[0]),
     hexToBigInt(secret.c0[1]),
-    secret.c2
-    ]);
+    secret.c2,
+  ]);
 };
 
 export const encryptMessage = async (
@@ -74,13 +74,12 @@ export const encryptMessage = async (
   //console.log(`c1x -> ${c1x}\n`);
   const c1y = bigIntToHex(uint8R2bigInt(c1[1]));
 
-
   //const c1bx = bigIntToUint8Array(hexToBigInt(c1x));
   //console.log(`c1bx -> ${c1bx}\n`);
 
   //const c3x = babyJub.F.bigIntToUint8ArrayObject(c1[0]).toString();
-  
-  const c0 = [c1x,c1y];
+
+  const c0 = [c1x, c1y];
 
   //console.log(`C1 -> ${c1}\n`);
   // P = nonce * PublicKey não circom ainda
@@ -112,6 +111,24 @@ export const stringToHex = (str: string): string => {
   return `0x${hexString}`;
 };
 
+export const to32ByteHex = (input: string): string => {
+  // Convert the input string to a Buffer
+  let buffer = Buffer.from(input);
+
+  // Ensure the buffer is exactly 32 bytes long
+  if (buffer.length > 32) {
+    // If the input is too long, truncate it to 32 bytes
+    buffer = buffer.slice(0, 32);
+  } else if (buffer.length < 32) {
+    // If the input is too short, pad it with zeros (on the left)
+    const padding = Buffer.alloc(32 - buffer.length);
+    buffer = Buffer.concat([padding, buffer]);
+  }
+
+  // Convert the buffer to a hex string
+  return buffer.toString("hex");
+}
+
 export const objectToHex = (obj: object): string => {
   const jsonString = JSON.stringify(obj);
   const hexString = Array.from(jsonString)
@@ -133,7 +150,7 @@ export const decryptMessage = async (
   const babyJub = await buildBabyjub();
   const c1 = [
     bigIntToUint8Array(hexToBigInt(ciphertext.c0[0])),
-    bigIntToUint8Array(hexToBigInt(ciphertext.c0[1]))
+    bigIntToUint8Array(hexToBigInt(ciphertext.c0[1])),
   ] as Point;
   // P = privateKey * c1
   const sharedPoint = babyJub.mulPointEscalar(c1, privateKey);
