@@ -13,6 +13,7 @@ export interface Input {
     pA: readonly [any, any];
     pB: readonly [readonly [any, any], readonly [any, any]];
     pC: readonly [any, any];
+    inR: readonly [any, any];
   };
 }
 

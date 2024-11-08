@@ -32,10 +32,27 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
     
     const nullifier = await generateNullifier(commitment, BigInt(privKey));
     //console.log("nullifier:", nullifier);
+    const argv = ownProof
+    .replace(/["[\]\s]/g, "")
+    .split(",")
+    .map((x: string | number | bigint | boolean) => BigInt(x).toString());
 
-    console.log("pA:", ownProof[0]);
-    console.log("pB:", ownProof[1]);
-    console.log("pC:", ownProof[2]);
+    const a = [argv[0], argv[1]];
+    const b = [
+      [argv[2], argv[3]],
+      [argv[4], argv[5]],
+    ];
+    const c = [argv[6], argv[7]];
+    const inR = [];
+
+    for (let i = 8; i < argv.length; i++) {
+      inR.push(argv[i]);
+    }
+
+    console.log("pA:", a);
+    console.log("pB:", b);
+    console.log("pC:", c);
+    console.log("inR:", inR);
 
     /* pA: ownProof[0] as [bigint, bigint],
             pB: ownProof[1] as [[bigint, bigint], [bigint, bigint]],
@@ -43,9 +60,10 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
 
     const input: Input = {
         ownershipProof: {
-            pA: ["0x160d62836c82a44fbfef0bcd60b0f933036f17b97121c3147cdca8e4c68a4c88", "0x01c1529b29462a0d6c18f8f9c2bda2dd5874382d03d2a1f70dc4f448378e88c3"],
-            pB: [["0x1803dc3409bee34b8f2275b99953fdb691e31692e81a8f701c9b89fe6e95b490", "0x267942ab6f6ac41a2fc493bbdf1c598a946f2e3f8abcd354130b3997b7bf7d6a"],["0x21b1dd9b38a94213286b5353acfb085c2d272282e727851403f3dc1ba309234a", "0x1dcba9a67f57391c2485a56310991f0007dc7d06b4db83d92ba985df0b6c3b87"]],
-            pC: ["0x1f9dd0919c21c990e6304f39677d4ddc559d429de7497c15b9f57545dee156b2", "0x0f16378e263c91d12f830c2139d16848715d9b6ce45b9f1aee882d0617175d67"]
+            pA: a as [bigint, bigint],
+            pB: b as [[bigint, bigint], [bigint, bigint]],
+            pC: c as [bigint, bigint],
+            inR: inR as [bigint, bigint]
         },
         nullifier: `0x${nullifier}`
     };

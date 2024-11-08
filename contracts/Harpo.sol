@@ -1,22 +1,36 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8;
 
-import {Groth16Verifier} from "./VerifierPubKey.sol";
+import {Groth16Verifier} from "./Groth16Verifier.sol";
 //import {SparseMerkleTree} from "./SparseMerkleTree.sol";
 
 
 /*interface IPoseidon {
     function hash(bytes32[1] memory input) external view returns (bytes32);
 }*/
+interface IGrothVerifier {
+    function verifyProof(
+        uint256[2] memory a,
+        uint256[2][2] memory b,
+        uint256[2] memory c,
+        uint256[2] memory input
+    ) external view returns (bool);
+}
 
 contract Harpo {
 
     Groth16Verifier internal verifier;
 
+   // address public s_grothVerifierAddress;
+    constructor(Groth16Verifier _verifier) {
+        verifier = _verifier;        
+    }
+
     struct Proof {
         uint[2] pA;
         uint[2][2] pB;
         uint[2] pC;
+        uint[2] inR;
     }
     
     struct Input {
@@ -61,13 +75,15 @@ contract Harpo {
         
         uint256[2] memory fixedSizeInputs;
 
+        //IGrothVerifier verifier = IGrothVerifier(s_grothVerifierAddress); 
+
         for (uint i = 0; i < transfer.inputs.length; i++) {
             require(
                 verifier.verifyProof(
                     transfer.inputs[i].ownershipProof.pA,
                     transfer.inputs[i].ownershipProof.pB,
                     transfer.inputs[i].ownershipProof.pC,
-                    fixedSizeInputs
+                    transfer.inputs[i].ownershipProof.inR
                 ), "Ownership proof invalida");
         }
 

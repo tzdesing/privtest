@@ -18,7 +18,7 @@
     along with snarkJS. If not, see <https://www.gnu.org/licenses/>.
 */
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity ^0.8;
 
 contract Groth16Verifier {
     // Scalar field size
@@ -173,5 +173,5 @@ contract Groth16Verifier {
             mstore(0, isValid)
              return(0, 0x20)
          }
-     }
+    }
  }
