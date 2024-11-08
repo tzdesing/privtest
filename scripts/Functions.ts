@@ -59,7 +59,7 @@ export const encryptMessage = async (
   message: bigint,
   nonce: bigint
 ): Promise<any> => {
-  console.log(`message -> ${message}\n`);
+  //console.log(`message -> ${message}\n`);
   const ff = require("ffjavascript");
 
   const poseidon = await buildPoseidon();

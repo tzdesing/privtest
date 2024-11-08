@@ -96,4 +96,5 @@ This project was made by :
 
 4 - snarkjs zkey export solidityverifier multiplier2_0001.zkey verifier.sol
 
-5- compilar contrato -> npx hardhat compile
+5 - compilar contrato -> npx hardhat compile
+6 - limpar cache -> npx hardhat clean
