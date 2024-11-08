@@ -1,28 +1,20 @@
-import { viem } from "hardhat";
 import path = require("path");
 import chalk, { Chalk } from "chalk";
-import { parseEther, formatEther } from "viem";
-import { ethers } from "ethers";
 
 import {
   genKeypair,
   genRandomSalt,
 } from "maci-crypto";
 import {
-  BabyJub,
   buildBabyjub,
-  Eddsa,
-  buildPoseidon,
-  Point,
 } from "circomlibjs";
-import { Input, Output, Proof, Transfer, UTXO } from "../model/interfaces";
+import { Transfer, UTXO } from "../model/interfaces";
 import {
   generatePrivKey,
   getSecret,
   getSecretAudit,
   hexToBigInt,
   objectToHex,
-  uint8R2bigInt,
 } from "./Functions";
 import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
@@ -192,15 +184,25 @@ async function main() {
 
   console.log(
     chalk.greenBright(
-      " Alice submete a transação ao contrato privado na rede\n"
+      " Alice deve submeter a transação ao contrato privado na rede\n"
     )
-  );  
+  );
 
   readline.question("Continua...");  
 
   const events = await sendTransaction(<Transfer>transfer0);
 
-  readline.question("Continua..."); 
+  readline.question("Continua...");
+  
+  console.log(
+    chalk.greenBright(
+      " Eventos recebidos pela rede\n"
+    )
+  );  
+
+  console.log("Eventos -> ", events);
+
+   
 
   //log do recibo da transação.
 
@@ -214,9 +216,7 @@ async function main() {
     { x: x },
     "build/poseidon_hasher_js/poseidon_hasher.wasm",
     "circuits/circuit_0000.zkey"
-  );
-  console.log(publicSignals);
-  console.log(proof);
+  ); 
   const vKey = JSON.parse(fs.readFileSync("circuits/verification_key.json"));
   const res = await snarkjs.groth16.verify(vKey, [commitment], proof);
   res === true ? console.log("Verification OK") : console.log("Invalid proof");*/
@@ -224,78 +224,47 @@ async function main() {
  
   //const Pubkey = new Circuit("pubkey");
   //const { proofJson, publicSignals } = await Pubkey.generateProofGrowth16({ sk: privKeyAlice });  
-  //console.log(publicSignals);
- //console.log(proofJson);
   //const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [babyJub.F.toObject(publicKeyAlice[0]).toString(), babyJub.F.toObject(publicKeyAlice[1]).toString()]);
 
   //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
 
   //const C1 = new Circuit("pubkey");
-  //const { proofJson, publicSignals } = await C1.generateProofGrowth16({ sk: nonce0.toString() });  
-  //console.log(publicSignals);
-  //console.log(proofJson);
+  //const { proofJson, publicSignals } = await C1.generateProofGrowth16({ sk: nonce0.toString() }); 
   //const resC1 = await C1.verifyProofGrowth16(proofJson, [babyJub.F.toObject(secret0.c1[0]).toString(), babyJub.F.toObject(secret0.c1[1]).toString()]);
 
   //resC1 === true ? console.log("Verification C1 OK") : console.log("Invalid C1 proof");
-  const sharedPoint = babyJub.mulPointEscalar(publicKeyAlice, nonce0);
+  /*const sharedPoint = babyJub.mulPointEscalar(publicKeyAlice, nonce0);
   const C2 = new Circuit("c2_verify");
   const { proofJson, publicSignals } = await C2.generateProofGrowth16(
     { 
       sharedPointX: babyJub.F.toObject(sharedPoint[0]).toString(), message: hexToBigInt(objectToHex(utxoA))
     }
-  );  
-  console.log(publicSignals);
-  console.log(proofJson);
+  );   
   const resC2 = await C2.verifyProofGrowth16(proofJson, secret0.c2);
+  resC2 === true ? console.log("Verification C2 OK") : console.log("Invalid C2 proof");*/
 
-  resC2 === true ? console.log("Verification C2 OK") : console.log("Invalid C2 proof");
-
-//=======================================================================
-const array = []
-const size = 253
-for (let i = 0; i < size; i++) {
-  array.push(0)
-}
-  const SecretVerify = new Circuit("secret_verify");
+ /* const SecretVerify = new Circuit("secret_verify");
   const { proofJsonV, publicSignalsV } = await SecretVerify.generateProofGrowth16({ 
     pubKeyX: BigInt(babyJub.F.toObject(publicKeyAlice[0]).toString()),
     pubKeyY: BigInt(babyJub.F.toObject(publicKeyAlice[1]).toString()),    
     message: hexToBigInt(objectToHex(utxoA)),
-    e:array,
+    //e:array,
     r: nonce0
-   });
-  // console.log(publicSignals);
-  
-  //console.log(proofJsonV);
+   }); */
   //const resSecretVerify = await SecretVerify.verifyProofGrowth16(proofJsonV, [uint8R2bigInt(secret0.c1[0]),uint8R2bigInt(secret0.c1[1]),secret0.c2]);
-
   //resSecretVerify === true ? console.log("Verification SecretVerify OK") : console.log("Invalid SecretVerify proof");
-
-
-
-
   //const { privKey, pubKey } = genKeypair();
   //const formattedPrivateKey = formatPrivKeyForBabyJub(privKey);
-
   //const privateKey = BigInt(privKey.toString());//ff.Scalar.random();  // Chave privada do receptor
-  //console.log(`Private Key 2 ${privateKey}\n`);
   //const field = babyJub.F;
-  // const publicKey = babyJub.mulPointEscalar(babyJub.Base8, privKey);  // Chave pública correspondente
-  //console.log(`Public Key ${publicKey}\n`);
-
-  //console.log(`Public Key other print ${ field.toObject(publicKey[0]).toString(), field.toObject(publicKey[1]).toString() }\n`);
-  
-  //let keypairAlice = genKeypair();
-  //let keypairBob = genKeypair();
-
+  //const publicKey = babyJub.mulPointEscalar(babyJub.Base8, privKey);  // Chave pública correspondente
   //const publicKeyAlice = babyJub.mulPointEscalar(babyJub.Base8, keypairAlice.privKey.toString());
   //const publicKeyBob = babyJub.mulPointEscalar(babyJub.Base8, keypairBob.privKey.toString());
-
   //const nonce = BigInt(genKeypair().privKey.toString());
   //const secret = await getSecret(utxo, publicKeyBob, nonce);
   // utxo, secret, chave privada -> secret + hash = commitment, commitment + privKey = nullifier
   
-    process.exit(0);  
+    process.exit();  
 }
 
 main().catch((err) => {
