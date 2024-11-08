@@ -35,7 +35,7 @@ export class Circuit {
         const snarkjs = require("snarkjs");
 		const { proof, publicSignals } = await snarkjs.groth16.fullProve(inputs, this.wasmPath, this.zkeyPath);
 		let proofCalldata = await snarkjs.groth16.exportSolidityCallData(proof, publicSignals);
-		proofCalldata = proofCalldata.split(",")[0].toString();
+		//proofCalldata = proofCalldata.split(",")[0].toString();
 		return { proofJson: proof, proofCalldata: proofCalldata, publicSignals: publicSignals };
 	}
 

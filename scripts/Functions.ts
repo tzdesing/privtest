@@ -1,7 +1,5 @@
 import { buildBabyjub, buildPoseidon, Point } from "circomlibjs";
 import { randomBytes } from "crypto";
-import { genKeypair } from "maci-crypto";
-import { UTXO } from "./Interfaces";
 import { poseidon2 } from "poseidon-lite";
 
 export const getSecret = async (
@@ -214,7 +212,7 @@ export const generateNullifier = async (
     uint8R2bigInt(
       poseidon([commitment, BigInt(privKey.toString())])
     )
-  );
+  ).slice(2);
 };
 
 export const uint8R2bigInt = (arr: any) => {

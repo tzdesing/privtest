@@ -1,5 +1,4 @@
 import * as dotenv from "dotenv";
-import { Token } from "./Interfaces";
 
 dotenv.config();
 const crypto = require('crypto')
@@ -20,14 +19,14 @@ async function main() {
     
     if (isNaN(Number(amount))) throw new Error("Invalid amount");
 
-    const token: Token = {
+    /*const token: Token = {
         ownerAddress: ownerAddress,
         type: tokenType,
         amount: amount,
         nonce: crypto.randomUUID()
     }
 
-    console.log("Token generated: " + JSON.stringify(token));
+    console.log("Token generated: " + JSON.stringify(token));*/
 
 }
 

@@ -2,12 +2,12 @@
 pragma solidity ^0.8;
 
 import {Groth16Verifier} from "./VerifierPubKey.sol";
-import {SparseMerkleTree} from "./SparseMerkleTree.sol";
+//import {SparseMerkleTree} from "./SparseMerkleTree.sol";
 
 
-interface IPoseidon {
+/*interface IPoseidon {
     function hash(bytes32[1] memory input) external view returns (bytes32);
-}
+}*/
 
 contract Harpo {
 
@@ -26,9 +26,7 @@ contract Harpo {
    
     struct Output {
         bytes32 secret;
-    }
-
-    
+    }    
     
     struct Transfer {
         Input[] inputs;             // Lista de `Input`
@@ -51,7 +49,7 @@ contract Harpo {
     mapping(bytes32 => bool) public nullifiersUsed;
     mapping(bytes32 => bool) public commitments;
    
-    IPoseidon public poseidon;    
+    //IPoseidon public poseidon;    
    
     function processTransfer(Transfer memory transfer) public {
         
@@ -89,8 +87,8 @@ contract Harpo {
     }
 
     function generateCommitment(bytes32 secret) public {
-        bytes32 commitment = poseidon.hash([secret]);
-        commitments[commitment] = true; 
-        emit CommitmentGenerated(secret, commitment);
+        //bytes32 commitment = poseidon.hash([secret]);
+        commitments[secret] = true; 
+        emit CommitmentGenerated(secret, secret);
     }
 }

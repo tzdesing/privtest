@@ -8,8 +8,12 @@ export interface Proof {
 }
 
 export interface Input {
-  secret: string;
-  proof: Proof;
+  nullifier: `0x${string}`;
+  ownershipProof: {
+    pA: readonly [any, any];
+    pB: readonly [readonly [any, any], readonly [any, any]];
+    pC: readonly [any, any];
+  };
 }
 
 export interface UTXO {
@@ -20,50 +24,17 @@ export interface UTXO {
 }
 
 export interface Output {
-  secret: string;
-  rangeOrigin: any;
-  rangeDestiny: any;
+  secret: `0x${string}`;
 }
 
-export interface OutputTrade {
-    secret: string;
-    proof: Proof;
-  }
-
-export interface OutputDeposit {
-  secret: string;
-}
 
 export interface Transfer {
-  inputs: Input[];
-  merkleRoot: string;
-  outputs: Output[];
-  massConservationProof: any;
+  inputs: ReadonlyArray<Input>;
+  merkleRoot: `0x${string}`;
+  outputs: ReadonlyArray<Output>;
+  massConservationProof: `0x${string}`;
   auditSecret: any;
   auditProof: any;
-}
-
-export interface Deposit {
-  inputs: Input[];
-  outputs: OutputDeposit[];
-  secretAudit: string;
-  massConservationProof: Proof;
-  nonRepudiationProof: Proof;
-}
-
-export interface TradeProposalSale {
-  depositOwnershipProof: Proof;
-  seller: String;
-  matchSecret: String;
-}
-
-export interface TradeProposalExecute {
-  outputs: OutputTrade[];
-  depositOwnershipProof: Proof;
-  massConservationProof: Proof;
-  matchProof: Proof;
-  secretAudit: string;
-  nonRepudiationProof: Proof;
 }
 
 export interface PublicKey {

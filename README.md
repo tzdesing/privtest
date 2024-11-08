@@ -95,3 +95,5 @@ This project was made by :
 3 - npx snarkjs zkey export verificationkey ./build/circuits/c2_verify/c2_verify.zkey c2_verify.vkey.json
 
 4 - snarkjs zkey export solidityverifier multiplier2_0001.zkey verifier.sol
+
+5- compilar contrato -> npx hardhat compile

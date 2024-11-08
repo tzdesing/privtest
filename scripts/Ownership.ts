@@ -1,4 +1,4 @@
-import { UTXO } from "./Interfaces";
+import { UTXO } from "../model/interfaces";
 import { Circuit } from "./Circuit";
 
 /*
@@ -12,8 +12,8 @@ export const genOwnershipProof = async (utxo: UTXO, privKey: string): Promise<an
   
   const Pubkey = new Circuit("pubkey");
   const { proofJson, publicSignals, proofCalldata } = await Pubkey.generateProofGrowth16({ sk: privKey });  
-  console.log(publicSignals);
-  console.log(proofJson);
+  //console.log(publicSignals);
+  //console.log(proofJson);
   //TODO remover verificação local
   const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [utxo.owner[0],utxo.owner[1]]);
 

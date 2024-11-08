@@ -174,15 +174,17 @@ async function main() {
       " Alice deve usar a chave pública da autoridade do contrato e os tokens de entrada e saída para criar o segredo e a prova de auditoria, e anexar ao objeto de transferencia\n"
     )
   );
-  const auditSecret = getSecretAudit([utxoA, utxoB, utxoC, utxoD], publicKeyAdmin,nonce2);
-  transfer0.auditSecret = auditSecret;
-  transfer0.auditProof = genAuditProof(auditSecret, publicKeyAdmin);
+  const auditSecret = await getSecretAudit([utxoA, utxoB, utxoC, utxoD], publicKeyAdmin,nonce2);
+  transfer0.auditSecret = `0x${"1f9dd0919c21c990e6304f39677d4ddc559d429de7497c15b9f57545dee156b2"}`;
+  transfer0.auditProof = await genAuditProof(auditSecret, publicKeyAdmin);
 
   console.log(
     chalk.greenBright(
       " Eis o objeto preenchido, pronto para ser submetido ->\n"
     )
   );
+
+  transfer0.merkleRoot = `0x${"1f9dd0919c21c990e6304f39677d4ddc559d429de7497c15b9f57545dee156b2"}`;
 
   console.log(transfer0);
 
@@ -198,7 +200,7 @@ async function main() {
 
   readline.question("Continua...");  
 
-  sendTransaction(<Transfer>transfer0);
+  await sendTransaction(<Transfer>transfer0);
 
   readline.question("Continua..."); 
 

@@ -1,6 +1,6 @@
 import { createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
-import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
+//import { abi } from "../artifacts/contracts/TokenizedBallot.sol/Ballot.json";
 import * as dotenv from "dotenv";
 
 
@@ -8,7 +8,7 @@ dotenv.config();
 const providerApiKey = process.env.ALCHEMY_API_KEY || "";
 
 async function main() {
-    const parameters = process.argv.slice(2);
+    /*const parameters = process.argv.slice(2);
     if (!parameters || parameters.length < 2)
         throw new Error("Parameters not provided");
 
@@ -29,14 +29,14 @@ async function main() {
     
     const voteCount = (await publicClient.readContract({
         address: contractAddress,
-        abi,
+        "",
         functionName: "getVotePower",
         args: [voterAddress],
       })) as `0x${string}`;    
 
     console.log("Voter Voting Power: ", voteCount);
 
-    process.exit();
+    process.exit();*/
 }
 
 main().catch((error) => {
