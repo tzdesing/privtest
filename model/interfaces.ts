@@ -18,7 +18,13 @@ export interface UTXO {
   nonce: string;
 }
 export interface Output {
-  secret: `0x${string}`;
+  secret: Secret;
+}
+
+export interface Secret {
+  c1x: string;
+  c1y: string;
+  c2: any;
 }
 export interface Transfer {
   inputs: ReadonlyArray<Input>;

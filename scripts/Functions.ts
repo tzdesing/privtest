@@ -1,6 +1,8 @@
 import { buildBabyjub, buildPoseidon, Point } from "circomlibjs";
 import { randomBytes } from "crypto";
 import { poseidon2, poseidon3 } from "poseidon-lite";
+import { Secret } from "../model/interfaces";
+import { string } from "hardhat/internal/core/params/argumentTypes";
 
 export const getSecret = async (
   utxo: object,
@@ -48,8 +50,8 @@ export const generateCommitment = async (secret: any) => {
 
 export const generateCommitment5 = async (secret: any) => {
   return poseidon3([
-    hexToBigInt(secret.c0[0]),
-    hexToBigInt(secret.c0[1]),
+    hexToBigInt(secret.c1x),
+    hexToBigInt(secret.c1y),
     secret.c2,
   ]);
 };
@@ -93,7 +95,7 @@ export const encryptMessage = async (
 
   const c2 = ff.Scalar.add(message, bigint);
 
-  return { c0, c2 };
+  return { c1x, c1y, c2 };
 };
 
 export const bigIntToHex = (bigInt: bigint): string => {
@@ -129,6 +131,72 @@ export const to32ByteHex = (input: string): string => {
   return buffer.toString("hex");
 }
 
+/*==================================*/
+
+function base64To32ByteHex(base64String: string): string {
+  // Decode Base64 to a Uint8Array
+  const binaryString = atob(base64String);
+  const byteArray = new Uint8Array(binaryString.length);
+  for (let i = 0; i < binaryString.length; i++) {
+    byteArray[i] = binaryString.charCodeAt(i);
+  }
+
+  // Convert Uint8Array to a hex string
+  let hexString = Array.from(byteArray)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Ensure the hex string is 32 bytes (64 hex characters)
+  if (hexString.length < 64) {
+    hexString = hexString.padEnd(64, '0'); // Pad with zeros if necessary
+  } else if (hexString.length > 64) {
+    hexString = hexString.slice(0, 64); // Trim if longer than 64 characters
+  }
+
+  return hexString;
+}
+
+function hexToBase64(hexString: string): string {
+  // Convert hex string to a byte array
+  const byteArray = new Uint8Array(hexString.length / 2);
+  for (let i = 0; i < hexString.length; i += 2) {
+    byteArray[i / 2] = parseInt(hexString.substr(i, 2), 16);
+  }
+
+  // Convert byte array to a binary string
+  const binaryString = Array.from(byteArray)
+    .map(byte => String.fromCharCode(byte))
+    .join('');
+
+  // Encode binary string to Base64
+  return btoa(binaryString);
+}
+
+export const packSecret = (secret: any): Secret => {
+    const packSecret: Secret = {
+        c1x : secret.c1x,
+        c1y : secret.c1y,
+        c2 : bigIntToHex(secret.c2)
+    }
+ return packSecret;
+}
+
+export const unpackSecret = (packSecret: Secret): object => {
+// Convert back from hex to Base64
+
+const unpackedSecret: Secret = {
+    c1x : packSecret.c1x,
+    c1y : packSecret.c1y,
+    c2 : hexToBigInt(packSecret.c2)
+}
+//console.log("unpackedSecret:", unpackedSecret);
+return unpackedSecret;
+}
+
+/*======================================*/
+
+
+
 export const objectToHex = (obj: object): string => {
   const jsonString = JSON.stringify(obj);
   const hexString = Array.from(jsonString)
@@ -149,8 +217,8 @@ export const decryptMessage = async (
   const poseidon = await buildPoseidon();
   const babyJub = await buildBabyjub();
   const c1 = [
-    bigIntToUint8Array(hexToBigInt(ciphertext.c0[0])),
-    bigIntToUint8Array(hexToBigInt(ciphertext.c0[1])),
+    bigIntToUint8Array(hexToBigInt(ciphertext.c1x)),
+    bigIntToUint8Array(hexToBigInt(ciphertext.c1y)),
   ] as Point;
   // P = privateKey * c1
   const sharedPoint = babyJub.mulPointEscalar(c1, privateKey);

@@ -33,7 +33,13 @@ contract Harpo {
     }
    
     struct Output {
-        bytes32 secret;
+        Secret secret;
+    }
+
+    struct Secret {
+        string c1x;
+        string c1y;
+        string c2;
     }    
     
     struct Transfer {
@@ -45,7 +51,7 @@ contract Harpo {
         bytes auditProof;            // Dados arbitrários
     }
 
-    event CommitmentGenerated(bytes32 secret, bytes32 commitment);
+    event CommitmentGenerated(Secret secret, Secret commitment);
 
     error InvalidProof(
         bytes32 leaf,
@@ -92,9 +98,9 @@ contract Harpo {
         return commitments[commitment];
     }
 
-    function generateCommitment(bytes32 secret) public {
+    function generateCommitment(Secret memory secret) public {
         //bytes32 commitment = poseidon.hash([secret]);
-        commitments[secret] = true; 
+        //commitments[secret] = true; 
         emit CommitmentGenerated(secret, secret);
     }
 }

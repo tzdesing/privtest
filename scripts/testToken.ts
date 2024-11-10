@@ -8,14 +8,16 @@ import {
 import {
   buildBabyjub,
 } from "circomlibjs";
-import { Transfer, UTXO } from "../model/interfaces";
-import {
+import { Secret, Transfer, UTXO } from "../model/interfaces";
+import hexToObject, {
+  decryptMessage,
   generatePrivKey,
   getSecret,
   getSecretAudit,
   hexToBigInt,
   objectToHex,
   to32ByteHex,
+  unpackSecret,
 } from "./Functions";
 import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
@@ -130,7 +132,7 @@ async function main() {
   
   readline.question("Continua...");
 
-  transfer0.outputs = await buildOutputs([utxoC, utxoD]);
+  transfer0.outputs = await buildOutputs([utxoC, utxoD], [publicKeyAlice,publicKeyBob]);
 
   console.log(
     chalk.greenBright(
@@ -206,8 +208,38 @@ async function main() {
 
   console.log("Eventos -> ", events);
 
-   
+  console.log("C1x recebido -> ",events[0].args.secret.c1x);
+  console.log("C1y recebido -> ",events[0].args.secret.c1y);
+  console.log("C2o -> ",events[0].args.secret.c2);
 
+  const receivedSecret0 : Secret ={
+    c1x:events[0].args.secret.c1x,
+    c1y:events[0].args.secret.c1y,
+    c2:events[0].args.secret.c2 
+  } 
+
+  const receivedSecret1 : Secret ={
+    c1x:events[1].args.secret.c1x,
+    c1y:events[1].args.secret.c1y,
+    c2:events[1].args.secret.c2 
+  } 
+
+  const decrpMsgBob = await decryptMessage(BigInt(privKeyBob),unpackSecret(receivedSecret0));
+
+  console.log("decrpMsgBob", hexToObject<UTXO>(decrpMsgBob));
+
+  const decrpMsgBob1 = await decryptMessage(BigInt(privKeyBob),unpackSecret(receivedSecret1));
+
+  console.log("decrpMsgBob1", hexToObject<UTXO>(decrpMsgBob1));
+
+
+  const decrpMsgAlice = await decryptMessage(BigInt(privKeyAlice),unpackSecret(receivedSecret1));
+
+  console.log("decrpMsgAlice", hexToObject<UTXO>(decrpMsgAlice));
+
+  const decrpMsgAlice1 = await decryptMessage(BigInt(privKeyAlice),unpackSecret(receivedSecret0));
+
+  console.log("decrpMsgAlice1", hexToObject<UTXO>(decrpMsgAlice1));
   //log do recibo da transação.
 
   //verificar merkle tree antes e depois

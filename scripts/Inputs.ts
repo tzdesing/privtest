@@ -8,7 +8,7 @@ export const buildInputs = async (secrets: any[],privKey: string): Promise<any[]
   //const PoseidonHasher = new Circuit("poseidon_hasher");
   for (const secret of secrets) {
     const utxo : UTXO = hexToObject<UTXO>(await decryptMessage(BigInt(privKey), secret ));
-    //console.log("Decrypted Message Hex:",utxo);
+    console.log("Decrypted Message Hex:",utxo);
 
     const ownProof = await genOwnershipProof(utxo,privKey);
     //console.log("prova conhecimento chave privada:",ownProof);
