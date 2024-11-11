@@ -2,34 +2,24 @@ import { Transfer } from "../model/interfaces";
 import { viem } from "hardhat";
 import chalk, { Chalk } from "chalk";
 
-/*
-const provider = new ethers.JsonRpcProvider();
-const defaultWallet = new ethers.Wallet("" );
-const harpoABI = require("./contracts/abi/Harpo.json");
-const harpoContract = new ethers.Contract("",harpoABI,provider);*/
-
-export const sendTransaction = async (transfer: Transfer): Promise<any[]> => {
+export const sendTransaction = async (harpoContract: any, transfer: Transfer): Promise<any[]> => {
   const readline = require("readline-sync");
-  const verifierContract = await viem.deployContract("Groth16Verifier");
-  console.log(
-    chalk.greenBright(
-      " Contrato verificador de prova implantado na rede\n"
-    )
-  );
-  console.log("Address ->",verifierContract.address);
-  readline.question("Continua...");
-
+ 
   const publicClient = await viem.getPublicClient();
-  //const [deployer, account1] = await viem.getWalletClients();
-  //const harpoContract = await viem.deployContract("Harpo",[verifierContract.address]);
-  const harpoContract = await viem.deployContract("Harpo",[verifierContract.address]);
+
+  /*const nullifierUsedAntes = await publicClient.readContract({
+    address: harpoContract.address,
+    abi: harpoContract.abi,
+    functionName: "isNullifierUsed",
+    args: [transfer.inputs[0].nullifier]
+  });
   console.log(
     chalk.greenBright(
-      " Contrato Harpo implantado na rede\n"
+      " Nuliffier 1 usado antes ?\n"
     )
-  );
-  readline.question("Continua...");
-  //console.log("transfer", transfer);
+  );  
+  console.log("nullifierUsed Antes", nullifierUsedAntes);*/
+  
   const hash = await harpoContract.write.processTransfer([transfer]);
   console.log(
     chalk.greenBright(
@@ -37,11 +27,24 @@ export const sendTransaction = async (transfer: Transfer): Promise<any[]> => {
     )
   );  
   console.log("hash", hash);
+
+  /*const nullifierUsed = await publicClient.readContract({
+    address: harpoContract.address,
+    abi: harpoContract.abi,
+    functionName: "isNullifierUsed",
+    args: [transfer.inputs[0].nullifier]
+  });
+  console.log(
+    chalk.greenBright(
+      " Nuliffier 1 usado depois?\n"
+    )
+  );  
+  console.log("nullifierUsed", nullifierUsed);*/
   readline.question("Continua...");
 
   const receipt = await publicClient.waitForTransactionReceipt({ hash });  
   console.log("Recibo Transação ->", receipt);
   const commEvents = await harpoContract.getEvents.CommitmentGenerated();
-  //console.log("commEvents", commEvents);
+ 
   return commEvents;
 };

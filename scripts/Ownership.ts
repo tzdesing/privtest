@@ -17,8 +17,8 @@ export const genOwnershipProof = async (utxo: UTXO, privKey: string): Promise<an
   //TODO remover verificação local
   const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [utxo.owner[0],utxo.owner[1]]);
 
-  //TODO remover log
-  resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
+  
+  //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
 
   /*
   const commitmentExists: boolean = verifyCommitmentXSMT( commitmentO);

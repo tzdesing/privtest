@@ -98,3 +98,5 @@ This project was made by :
 
 5 - compilar contrato -> npx hardhat compile
 6 - limpar cache -> npx hardhat clean
+
+7 - npx ts-node --files ./scripts/SimpleTransferScriptTest.ts

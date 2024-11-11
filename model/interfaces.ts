@@ -35,10 +35,10 @@ export interface Transfer {
   auditProof: any;
 }
 export interface PublicKey {
-  packed: bigint,
+  packed: bigint;
   //unpacked: Point<bigint>
 }
 export interface KeyPair {
-  privateKey: bigint
-  publicKey: PublicKey
+  privateKey: bigint;
+  publicKey: PublicKey;
 }
