@@ -30,9 +30,7 @@ Harpo foi projetado para resolver problemas de privacidade em redes de transaç�
 
 ## Requisitos
 
-- [Linguagem/Plataforma] (e.g. Go, Rust, Solidity)
-- Dependências para Zero Knowledge (e.g. ZK-SNARKs, zk-STARKs)
-- Bibliotecas de criptografia para a gestão de UTXOs e Nullifiers
+- [Linguagem/Plataforma] Node 20.11.1
 
 ## Instalação
 
@@ -46,13 +44,8 @@ git clone https://github.com/seu_usuario/harpo.git
 
 Create a `.env` file with your private key and desired RPC provider information:
 ```bash
-MNEMONIC="here is where your extracted twelve words mnemonic phrase should be put"
+
 PRIVATE_KEY="YOUR_WALLET_PRIVATE_KEY"
-POKT_API_KEY="********************************"
-INFURA_API_KEY="********************************"
-INFURA_API_SECRET="********************************"
-ALCHEMY_API_KEY="="********************************""
-ETHERSCAN_API_KEY="********************************"
 ```
 
 Install the dependencies
@@ -60,27 +53,17 @@ Install the dependencies
 npm install
 ```
 
+Compile contracts
+```bash
+npx hardhat compile
+```
+
 ## Usage
 The scripts are supposed to be run with `npx ts-node`. 
 
-Deploying the Ballot contract:
+Run test script:
 ```bash
-npx ts-node --files ./scripts/Deploy.ts "proposal1" "proposal2" "proposal3" "proposalN"
-```
-
-Create token:
-```bash
-npx ts-node --files ./scripts/GenerateToken.ts "0x6786ds876s8dfds8f7ds" "DREX" 10
-```
-
-Encrypt Data( Secret | Nullifier ):
-```bash
-npx ts-node --files ./scripts/GenerateSecret.ts '"ownerAddress":"0x6786ds876s8dfds8f7ds","type":"DREX","amount":"10","nonce":"d4eb7ced-a07c-4d7a-878e-8547d8a928c3"}' "0x82A94fFBfb194a6a39E944271D5aB"
-```
-
-Generate Commitment:
-```bash
-npx ts-node --files ./scripts/GenerateCommitment.ts "86359cdd92657800cbb07a8c427e05e14212ab68bab44cbb05ba98b6e82d59abf645967b093c97261a78326b10b0dc24460905975eb3e7e7d1372dec9df9ab2fc9a112720acae9627fe5455d3f6f0fa35755d97d72ac6aa0f3eb87399a0edc02df04552934596fc078f6abe2ab2801971f767d0472e1561357f5dc3426be5490"
+npx ts-node --files ./scripts/SimpleTransferScriptTest.ts 
 ```
 
 ## Contributors
@@ -89,14 +72,12 @@ This project was made by :
 - [AAAA](https://github.com/AAAA)
 - [BBBB](https://github.com/BBBB)
 
+Comandos úteis
 
 1 - circom c2_verify.circom --wasm --r1cs --sym -o ../build
 2 - snarkjs groth16 setup ../build/circuits/c2_verify/c2_verify.r1cs powersOfTau28_hez_final_15.ptau c2_verify.zkey
 3 - npx snarkjs zkey export verificationkey ./build/circuits/c2_verify/c2_verify.zkey c2_verify.vkey.json
-
 4 - snarkjs zkey export solidityverifier multiplier2_0001.zkey verifier.sol
-
 5 - compilar contrato -> npx hardhat compile
 6 - limpar cache -> npx hardhat clean
-
 7 - npx ts-node --files ./scripts/SimpleTransferScriptTest.ts

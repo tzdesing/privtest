@@ -9,12 +9,9 @@ import hexToObject, {
   generatePrivKey,
   getSecret,
   getSecretAudit,
-  hexToBigInt,
-  objectToHex,
   to32ByteHex,
   unpackSecret,
 } from "./Functions";
-import { Circuit } from "./Circuit";
 import { buildOutputs } from "./Outputs";
 import { buildInputs } from "./Inputs";
 import { buildMassConservationProof } from "./MassConservation";
@@ -195,7 +192,7 @@ async function main() {
       " Alice deve usar a chave pública da autoridade do contrato e os tokens de entrada e saída para criar o segredo e a prova de auditoria, e anexar ao objeto de transferência\n"
     )
   );
-  
+
   const auditSecret = await getSecretAudit(
     [utxoA, utxoB, utxoC, utxoD],
     publicKeyAdmin,
@@ -250,43 +247,55 @@ async function main() {
     )
   );
 
-  try{
+  try {
     const decrpMsgBob = await decryptMessage(
       BigInt(privKeyBob),
       unpackSecret(receivedSecret0)
-    );  
-    console.log("Evento 1, decriptado por Bob ->\n", hexToObject<UTXO>(decrpMsgBob));
-  }catch(e){
+    );
+    console.log(
+      "Evento 1, decriptado por Bob ->\n",
+      hexToObject<UTXO>(decrpMsgBob)
+    );
+  } catch (e) {
     console.log("Bob não conseguiu decriptar o Evento 1\n");
   }
 
-  try{
+  try {
     const decrpMsgBob = await decryptMessage(
       BigInt(privKeyBob),
       unpackSecret(receivedSecret1)
-    );  
-    console.log("Evento 2, decriptado por Bob ->\n", hexToObject<UTXO>(decrpMsgBob));
-  }catch(e){
+    );
+    console.log(
+      "Evento 2, decriptado por Bob ->\n",
+      hexToObject<UTXO>(decrpMsgBob)
+    );
+  } catch (e) {
     console.log("Bob não conseguiu decriptar o Evento 2\n");
   }
 
-  try{
+  try {
     const decrpMsgAlice = await decryptMessage(
       BigInt(privKeyAlice),
       unpackSecret(receivedSecret0)
-    );  
-    console.log("Evento 1, decriptado por Alice ->\n", hexToObject<UTXO>(decrpMsgAlice));
-  }catch(e){
+    );
+    console.log(
+      "Evento 1, decriptado por Alice ->\n",
+      hexToObject<UTXO>(decrpMsgAlice)
+    );
+  } catch (e) {
     console.log("Alice não conseguiu decriptar o Evento 1\n");
   }
 
-  try{
+  try {
     const decrpMsgAlice = await decryptMessage(
       BigInt(privKeyAlice),
       unpackSecret(receivedSecret1)
-    );  
-    console.log("Evento 2, decriptado por Alice ->\n", hexToObject<UTXO>(decrpMsgAlice));
-  }catch(e){
+    );
+    console.log(
+      "Evento 2, decriptado por Alice ->\n",
+      hexToObject<UTXO>(decrpMsgAlice)
+    );
+  } catch (e) {
     console.log("Alice não conseguiu decriptar o Evento 2\n");
   }
 

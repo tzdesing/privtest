@@ -1,7 +1,6 @@
 import { genKeypair } from "maci-crypto";
 import { UTXO } from "../model/interfaces";
 
-
 /*
 - devemos gerar uma prova que a soma das entradas corresponde a soma das saidas 
 */

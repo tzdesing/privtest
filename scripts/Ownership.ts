@@ -8,16 +8,21 @@ import { Circuit } from "./Circuit";
 - Devemos provar que o nullifier foi gerado através do commitment existente
 
 */
-export const genOwnershipProof = async (utxo: UTXO, privKey: string): Promise<any> => {
-  
+export const genOwnershipProof = async (
+  utxo: UTXO,
+  privKey: string
+): Promise<any> => {
   const Pubkey = new Circuit("pubkey");
-  const { proofJson, publicSignals, proofCalldata } = await Pubkey.generateProofGrowth16({ sk: privKey });  
+  const { proofJson, publicSignals, proofCalldata } =
+    await Pubkey.generateProofGrowth16({ sk: privKey });
   //console.log(publicSignals);
   //console.log(proofJson);
   //TODO remover verificação local
-  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [utxo.owner[0],utxo.owner[1]]);
+  const resPubkey = await Pubkey.verifyProofGrowth16(proofJson, [
+    utxo.owner[0],
+    utxo.owner[1],
+  ]);
 
-  
   //resPubkey === true ? console.log("Verification Pubkey OK") : console.log("Invalid Pubkey proof");
 
   /*

@@ -1,8 +1,4 @@
-import {
-  generatePrivKey,
-  getSecret,
-  packSecret,
-} from "./Functions";
+import { generatePrivKey, getSecret, packSecret } from "./Functions";
 import { Output, UTXO } from "../model/interfaces";
 import { Point } from "circomlibjs";
 
